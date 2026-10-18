@@ -1,27 +1,125 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { newId, readDB, updateDB } from "@/lib/db";
+import { redirect } from "next/navigation";
+import { newId, newToken, readDB, updateDB } from "@/lib/db";
 import { classifyQuestion, summarizeReplies } from "@/lib/ai";
+import { ADMIN_COOKIE, requireAdmin } from "@/lib/admin";
 import { weekStart } from "@/lib/format";
-import type { Question, WeeklyReport } from "@/lib/types";
+import type { Call, Lead, Parent, Plan, Question, WeeklyReport } from "@/lib/types";
 
 // 운영자 화면 — 0~1단계에서 vox 웹훅·스케줄러가 할 일을 손으로 대신한다
-function assertKey(form: FormData) {
-  const key = process.env.ADMIN_KEY;
-  if (key && form.get("key") !== key) throw new Error("운영자 키가 맞지 않아요.");
-}
 
 const str = (v: FormDataEntryValue | null) => (typeof v === "string" ? v.trim() : "");
-const lines = (v: FormDataEntryValue | null) =>
+const lines = (v: FormDataEntryValue | null, max = 3) =>
   str(v)
     .split("\n")
     .map((s) => s.trim())
     .filter(Boolean)
-    .slice(0, 3);
+    .slice(0, max);
+const done = () => revalidatePath("/", "layout");
+
+export async function login(form: FormData) {
+  if (str(form.get("key")) !== process.env.ADMIN_KEY) redirect("/admin/login?error=1");
+  (await cookies()).set(ADMIN_COOKIE, str(form.get("key")), { httpOnly: true, sameSite: "lax", maxAge: 60 * 60 * 24 * 30, path: "/" });
+  redirect("/admin");
+}
+
+// ---- 가족 등록 (온보딩) ----
+
+export async function createFamily(form: FormData) {
+  await requireAdmin();
+  const parentName = str(form.get("parentName")) || "엄마";
+  const plan = (str(form.get("plan")) || "standard") as Plan;
+  const familyId = newId();
+  const now = new Date().toISOString();
+
+  const names = form.getAll("childName").map(str);
+  const roles = form.getAll("childRole").map(str);
+  const phones = form.getAll("childPhone").map(str);
+  const payer = Number(form.get("payer") ?? 0);
+  const children = names
+    .map((name, i) => ({ name, role: roles[i] || `자녀${i + 1}`, phone: phones[i] || undefined, i }))
+    .filter((c) => c.name);
+  if (children.length === 0) throw new Error("자녀를 한 명 이상 등록해 주세요.");
+
+  await updateDB((db) => {
+    db.families.push({ id: familyId, name: str(form.get("familyName")) || `${parentName}네 가족방`, plan, status: "trial", createdAt: now });
+    db.parents.push({
+      id: newId(),
+      familyId,
+      name: parentName,
+      phone: str(form.get("parentPhone")),
+      phoneType: (str(form.get("phoneType")) || "2g") as Parent["phoneType"],
+      callTimes: str(form.get("callTimes")) || undefined,
+      notes: str(form.get("notes")) || undefined,
+      consent: { recording: false, summaryToChildren: false },
+    });
+    for (const c of children) {
+      db.children.push({
+        id: newId(),
+        familyId,
+        name: c.name,
+        role: c.role,
+        phone: c.phone,
+        token: newToken(),
+        payer: c.i === payer,
+        notify: { weekly: true, questions: true },
+      });
+    }
+    const leadId = str(form.get("leadId"));
+    const lead = db.leads.find((l) => l.id === leadId);
+    if (lead) lead.status = "onboarded";
+  });
+  done();
+  redirect(`/admin/f/${familyId}`);
+}
+
+// 첫 통화에서 받은 녹음·요약 동의 기록
+export async function saveConsent(form: FormData) {
+  await requireAdmin();
+  const familyId = str(form.get("familyId"));
+  await updateDB((db) => {
+    const p = db.parents.find((x) => x.familyId === familyId);
+    if (!p) return;
+    p.consent = {
+      recording: form.get("recording") === "on",
+      summaryToChildren: form.get("summaryToChildren") === "on",
+      at: new Date().toISOString(),
+      how: str(form.get("how")) || "첫 통화 음성 동의",
+    };
+    p.callTimes = str(form.get("callTimes")) || p.callTimes;
+    p.notes = str(form.get("notes")) || p.notes;
+  });
+  done();
+}
+
+export async function setFamilyStatus(form: FormData) {
+  await requireAdmin();
+  const id = str(form.get("familyId"));
+  const status = str(form.get("status")) as "trial" | "active" | "paused";
+  await updateDB((db) => {
+    const f = db.families.find((x) => x.id === id);
+    if (f) f.status = status;
+  });
+  done();
+}
+
+export async function setLeadStatus(form: FormData) {
+  await requireAdmin();
+  const id = str(form.get("leadId"));
+  await updateDB((db) => {
+    const l = db.leads.find((x) => x.id === id);
+    if (l) l.status = str(form.get("status")) as Lead["status"];
+  });
+  done();
+}
+
+// ---- 엄마 질문 ----
 
 export async function createQuestion(form: FormData) {
-  assertKey(form);
+  await requireAdmin();
   const text = str(form.get("text"));
   const familyId = str(form.get("familyId"));
   if (!text || !familyId) return;
@@ -41,24 +139,19 @@ export async function createQuestion(form: FormData) {
       createdAt: new Date().toISOString(),
     });
   });
-  revalidatePath("/", "layout");
+  done();
 }
 
-// 마감: 답을 모아 AI 요약 → 엄마께 보낼 문자(단문)·ARS 문구 생성
+// 마감: 답을 모아 요약 → 엄마께 보낼 문자(단문)·ARS 문구 생성
 export async function closeQuestion(form: FormData) {
-  assertKey(form);
+  await requireAdmin();
   const id = str(form.get("questionId"));
   const db = await readDB();
   const q = db.questions.find((x) => x.id === id);
   if (!q || q.status === "closed") return;
   const parent = db.parents.find((p) => p.familyId === q.familyId)!;
   const children = db.children.filter((c) => c.familyId === q.familyId);
-  const summary = await summarizeReplies(
-    q,
-    parent.name,
-    children,
-    db.replies.filter((r) => r.questionId === q.id),
-  );
+  const summary = await summarizeReplies(q, parent.name, children, db.replies.filter((r) => r.questionId === q.id));
 
   await updateDB((fresh) => {
     const target = fresh.questions.find((x) => x.id === id);
@@ -67,11 +160,88 @@ export async function closeQuestion(form: FormData) {
       target.summary = summary;
     }
   });
-  revalidatePath("/", "layout");
+  done();
 }
 
+// ---- 통화 기록 · 기억 노트 · 회상 이야기 ----
+
+export async function addCall(form: FormData) {
+  await requireAdmin();
+  const familyId = str(form.get("familyId"));
+  const answered = form.get("answered") === "on";
+  const at = str(form.get("at"));
+  const call: Call = {
+    id: newId(),
+    familyId,
+    at: at ? new Date(at).toISOString() : new Date().toISOString(),
+    kind: (str(form.get("kind")) || "regular") as Call["kind"],
+    answered,
+    minutes: answered ? Number(form.get("minutes")) || 0 : 0,
+    summary: answered ? str(form.get("summary")) || undefined : undefined,
+    mood: answered ? ((str(form.get("mood")) || undefined) as Call["mood"]) : undefined,
+    flags: form.getAll("flag").map(str).filter(Boolean),
+  };
+  const memory = str(form.get("memory"));
+  const story = str(form.get("storyText"));
+  const momQuestion = str(form.get("momQuestion"));
+  await updateDB((db) => {
+    db.calls.push(call);
+    if (memory) db.memories.push({ id: newId(), familyId, text: memory, createdAt: call.at });
+    if (story) db.stories.push({ id: newId(), familyId, topic: str(form.get("storyTopic")) || "회상", text: story, createdAt: call.at });
+  });
+  // 통화 중 엄마가 남긴 질문은 바로 형제들에게
+  if (momQuestion) {
+    const fd = new FormData();
+    fd.set("familyId", familyId);
+    fd.set("text", momQuestion);
+    fd.set("source", call.kind === "ars" ? "ars" : "call");
+    await createQuestion(fd);
+  }
+  done();
+}
+
+export async function deleteCall(form: FormData) {
+  await requireAdmin();
+  const id = str(form.get("id"));
+  await updateDB((db) => {
+    db.calls = db.calls.filter((c) => c.id !== id);
+  });
+  done();
+}
+
+export async function addMemory(form: FormData) {
+  await requireAdmin();
+  const text = str(form.get("text"));
+  if (!text) return;
+  await updateDB((db) => {
+    db.memories.push({ id: newId(), familyId: str(form.get("familyId")), text, createdAt: new Date().toISOString() });
+  });
+  done();
+}
+
+export async function deleteMemory(form: FormData) {
+  await requireAdmin();
+  const id = str(form.get("id"));
+  await updateDB((db) => {
+    db.memories = db.memories.filter((m) => m.id !== id);
+  });
+  done();
+}
+
+export async function addStory(form: FormData) {
+  await requireAdmin();
+  const text = str(form.get("text"));
+  if (!text) return;
+  await updateDB((db) => {
+    db.stories.push({ id: newId(), familyId: str(form.get("familyId")), topic: str(form.get("topic")) || "회상", text, createdAt: new Date().toISOString() });
+  });
+  done();
+}
+
+// ---- 주간 요약 ----
+
 export async function saveReport(form: FormData) {
-  assertKey(form);
+  await requireAdmin();
   const familyId = str(form.get("familyId"));
   const report: WeeklyReport = {
     id: newId(),
@@ -88,16 +258,16 @@ export async function saveReport(form: FormData) {
     db.reports = db.reports.filter((r) => !(r.familyId === familyId && r.weekOf === report.weekOf));
     db.reports.push(report);
   });
-  revalidatePath("/", "layout");
+  done();
 }
 
-// ARS "소식 듣기"에서 재생됐다고 표시 (vox 연동 전 수동)
+// ---- 우체통 ----
+
 export async function markPlayed(form: FormData) {
-  assertKey(form);
-  const id = str(form.get("id"));
+  await requireAdmin();
+  const ids = new Set(form.getAll("id").map(str));
   await updateDB((db) => {
-    const m = db.mailbox.find((x) => x.id === id);
-    if (m) m.played = true;
+    for (const m of db.mailbox) if (ids.has(m.id)) m.played = true;
   });
-  revalidatePath("/", "layout");
+  done();
 }

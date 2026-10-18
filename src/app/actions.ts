@@ -12,6 +12,32 @@ export interface FormState {
 const str = (v: FormDataEntryValue | null) => (typeof v === "string" && v.trim() ? v.trim() : undefined);
 const file = (v: FormDataEntryValue | null) => (v instanceof File && v.size > 0 ? v : null);
 
+// 랜딩페이지 첫 달 무료 신청
+export async function submitLead(_: FormState, form: FormData): Promise<FormState> {
+  const name = str(form.get("name"));
+  const phone = str(form.get("phone"));
+  if (!name || !phone) return { ok: false, message: "성함과 연락처를 적어 주세요." };
+  if (!/^[0-9-\s]{9,14}$/.test(phone)) return { ok: false, message: "연락처를 숫자로 적어 주세요." };
+  if (form.get("agree") !== "on") return { ok: false, message: "개인정보 수집·이용에 동의해 주세요." };
+
+  const plan = str(form.get("plan"));
+  const parentPhone = str(form.get("parentPhone"));
+  await updateDB((db) => {
+    db.leads.push({
+      id: newId(),
+      name,
+      phone,
+      siblings: Number(form.get("siblings")) || 1,
+      plan: plan === "basic" || plan === "premium" ? plan : "standard",
+      parentPhone: parentPhone === "smart" || parentPhone === "landline" ? parentPhone : "2g",
+      memo: str(form.get("memo")),
+      status: "new",
+      createdAt: new Date().toISOString(),
+    });
+  });
+  return { ok: true, message: `${name}님, 신청 고마워요. 하루 안에 연락드릴게요.` };
+}
+
 // 엄마 질문에 답장 (알림톡 "답장하기" 링크 → 답장 페이지)
 export async function submitReply(_: FormState, form: FormData): Promise<FormState> {
   const token = str(form.get("token"));
@@ -77,4 +103,23 @@ export async function submitMailbox(_: FormState, form: FormData): Promise<FormS
   });
   revalidatePath(`/f/${token}`);
   return { ok: true, message: "우체통에 넣었어요. 엄마가 전화하시면 제일 먼저 들려드려요." };
+}
+
+// 자녀 설정: 실시간 연결 가능 시간대, 알림 수신
+export async function saveChildSettings(_: FormState, form: FormData): Promise<FormState> {
+  const token = str(form.get("token"));
+  const found = token ? await findChild(token) : null;
+  if (!found) return { ok: false, message: "링크가 올바르지 않아요." };
+
+  const hours = str(form.get("availableHours"));
+  if (hours && !/^\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2}$/.test(hours)) return { ok: false, message: "시간은 19:00-22:00처럼 적어 주세요." };
+
+  await updateDB((db) => {
+    const c = db.children.find((x) => x.id === found.child.id);
+    if (!c) return;
+    c.availableHours = hours?.replace(/\s/g, "");
+    c.notify = { weekly: form.get("weekly") === "on", questions: form.get("questions") === "on" };
+  });
+  revalidatePath(`/f/${token}`, "layout");
+  return { ok: true, message: "저장했어요." };
 }

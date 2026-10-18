@@ -150,6 +150,15 @@ export default async function FamilyPage({ params }: { params: Promise<{ token: 
         </section>
       )}
 
+      <div className="row" style={{ marginTop: 6 }}>
+        <Link className="btn secondary" href={`/f/${token}/news`}>
+          📰 이달의 가족신문
+        </Link>
+        <Link className="btn secondary" href={`/f/${token}/settings`}>
+          ⚙️ 내 설정
+        </Link>
+      </div>
+
       <p className="footer">가족 안부 허브 · 링크는 {child.name}님 전용이에요</p>
     </>
   );

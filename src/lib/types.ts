@@ -5,14 +5,22 @@ export type QuestionType = "schedule" | "yesno" | "free";
 export interface Family {
   id: string;
   name: string; // 예: "김순자 님 가족"
-  plan: "basic" | "standard" | "premium";
+  plan: Plan;
+  status?: "trial" | "active" | "paused";
+  createdAt?: string;
 }
+
+export type Plan = "basic" | "standard" | "premium";
 
 export interface Parent {
   id: string;
   familyId: string;
   name: string; // 자녀들이 부르는 호칭: "엄마"
   phone: string; // 대표번호로 들어온 발신번호 식별 키
+  callTimes?: string; // 정기 안부콜 시간: "화·목·토 오전 10시"
+  phoneType?: "2g" | "smart" | "landline";
+  notes?: string; // 말 속도, 청력, 사투리 등 통화 설정 메모
+  consent?: { recording: boolean; summaryToChildren: boolean; at?: string; how?: string };
 }
 
 export interface Child {
@@ -21,6 +29,10 @@ export interface Child {
   name: string;
   role: string; // "큰아들", "딸", "막내"
   token: string; // 알림톡 링크용 토큰 (로그인 대신)
+  phone?: string;
+  availableHours?: string; // 실시간 연결 가능 시간대: "19:00-22:00"
+  notify?: { weekly: boolean; questions: boolean };
+  payer?: boolean; // 대표 결제자
 }
 
 export interface Question {
@@ -73,6 +85,49 @@ export interface WeeklyReport {
   calls: { answered: number; scheduled: number };
 }
 
+// AI 안부콜 기록 (vox 연동 전에는 운영자가 직접 입력)
+export interface Call {
+  id: string;
+  familyId: string;
+  at: string;
+  kind: "regular" | "ars" | "callback" | "transfer";
+  answered: boolean;
+  minutes: number;
+  summary?: string;
+  mood?: WeeklyReport["mood"];
+  flags: string[]; // "연속 미응답", "건강 언급" 등
+}
+
+// 다음 통화를 개인화하는 핵심 사실 (손주 이름, 관심사, 최근 일)
+export interface MemoryNote {
+  id: string;
+  familyId: string;
+  text: string;
+  createdAt: string;
+}
+
+// 회상 이야기 — 가족신문·회고록 원재료
+export interface Story {
+  id: string;
+  familyId: string;
+  topic: string;
+  text: string;
+  createdAt: string;
+}
+
+// 랜딩페이지 첫 달 무료 신청
+export interface Lead {
+  id: string;
+  name: string;
+  phone: string;
+  siblings: number;
+  plan: Plan;
+  parentPhone: "2g" | "smart" | "landline";
+  memo?: string;
+  status: "new" | "contacted" | "onboarded" | "dropped";
+  createdAt: string;
+}
+
 export interface DB {
   families: Family[];
   parents: Parent[];
@@ -82,4 +137,8 @@ export interface DB {
   checks: CallCheck[];
   mailbox: MailboxItem[];
   reports: WeeklyReport[];
+  calls: Call[];
+  memories: MemoryNote[];
+  stories: Story[];
+  leads: Lead[];
 }
