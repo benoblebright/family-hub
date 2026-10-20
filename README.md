@@ -19,10 +19,19 @@ npm run dev
 ```
 데모 링크: `/f/minsu-demo`, `/f/jiyoung-demo`, `/f/junho-demo`, `/admin`
 
+## 배포 (Vercel)
+1. Firebase 콘솔 `family-hub-anbu` → 프로젝트 설정 → 서비스 계정 → **새 비공개 키 생성** (JSON)
+2. 음성 저장을 쓰려면 Blaze 요금제 연결 후 Storage 시작
+3. Vercel → Add New Project → GitHub `benoblebright/family-hub` 가져오기
+4. 환경변수: `FIREBASE_SERVICE_ACCOUNT`(JSON 한 줄 그대로), `ANTHROPIC_API_KEY`, `ADMIN_KEY`
+5. Deploy
+
 ## 환경변수 (.env.local)
 - `ANTHROPIC_API_KEY` — 있으면 질문 분류·답장 요약을 Claude로, 없으면 규칙 템플릿으로 동작
 - `CLAUDE_MODEL` — 기본 `claude-opus-5-5`
-- `ADMIN_KEY` — 설정 시 `/admin?key=...` 필요
+- `ADMIN_KEY` — 설정 시 `/admin/login`에서 로그인 필요
+- `FIREBASE_SERVICE_ACCOUNT` — 있으면 Firestore·Cloud Storage에 저장, 없으면 `data/db.json`
+- `FIREBASE_STORAGE_BUCKET` — 기본 `<프로젝트ID>.firebasestorage.app`
 
 ## 데이터
 `data/db.json` + `data/audio/` (첫 실행 시 데모 가족 자동 생성, 지우면 초기화). 2단계에서 Supabase로 이전.
