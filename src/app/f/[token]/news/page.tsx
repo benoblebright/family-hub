@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { findChild } from "@/lib/db";
-import { josa } from "@/lib/format";
+import { josa, kstDate } from "@/lib/format";
 import { PrintButton } from "@/components/PrintButton";
 
 export const dynamic = "force-dynamic";
@@ -20,10 +20,9 @@ export default async function News({
   if (!found) notFound();
   const { db, family, parent, siblings } = found;
 
-  const now = new Date();
-  const ym = /^\d{4}-\d{2}$/.test(month ?? "") ? month! : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const ym = /^\d{4}-\d{2}$/.test(month ?? "") ? month! : kstDate().slice(0, 7);
   const [y, m] = ym.split("-").map(Number);
-  const inMonth = (iso: string) => iso.slice(0, 7) === ym;
+  const inMonth = (iso: string) => kstDate(iso).slice(0, 7) === ym;
   const prev = new Date(y, m - 2, 1);
   const prevYm = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, "0")}`;
 

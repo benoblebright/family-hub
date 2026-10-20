@@ -1,26 +1,48 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { findChild } from "@/lib/db";
-import { josa, timeAgo, untilDeadline, weekStart } from "@/lib/format";
+import { familyNow, processFamily } from "@/lib/checkin";
+import { josa, kstDate, kstLabel, timeAgo, untilDeadline, weekStart } from "@/lib/format";
 import { CallCheckForm, MailboxForm } from "@/components/Forms";
+import { ResponseCalendar } from "@/components/ResponseCalendar";
+import { InviteCard } from "@/components/InviteCard";
 
 export const dynamic = "force-dynamic";
 
 const MOOD_TAG = { 좋음: "ok", 보통: "gray", "조금 걱정": "warn" } as const;
 
 // 가족 대시보드 — 주간 알림톡 링크로 들어오는 형제 공동 공간
-export default async function FamilyPage({ params }: { params: Promise<{ token: string }> }) {
+export default async function FamilyPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ token: string }>;
+  searchParams: Promise<{ welcome?: string }>;
+}) {
   const { token } = await params;
-  const found = await findChild(token);
-  if (!found) notFound();
-  const { db, child, family, parent, siblings } = found;
+  const { welcome } = await searchParams;
+  const first = await findChild(token);
+  if (!first) notFound();
+  // 안부 문자 흐름(재문자·확인콜·알림)과 마감된 질문을 먼저 처리한다
+  await processFamily(first.family.id);
+  const { db, child, family, parent, siblings } = (await findChild(token))!;
+  const now = familyNow(family);
+  const today = kstDate(now);
+  const checkins = db.checkins.filter((c) => c.familyId === family.id);
+  const todayCheckin = checkins.find((c) => c.date === today);
+  const alerts = db.events
+    .filter((e) => e.familyId === family.id && e.kind === "alert" && new Date(e.at).getTime() <= now && now - new Date(e.at).getTime() < 3 * 86400_000)
+    .reverse();
+  const h = await headers();
+  const origin = `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}`;
 
   const report = db.reports.filter((r) => r.familyId === family.id).at(-1);
   const questions = db.questions.filter((q) => q.familyId === family.id).reverse();
   const open = questions.filter((q) => q.status === "open");
   const closed = questions.filter((q) => q.status === "closed").slice(0, 3);
 
-  const since = weekStart();
+  const since = weekStart(now);
   const siblingIds = new Set(siblings.map((s) => s.id));
   const weekChecks = db.checks.filter((c) => siblingIds.has(c.childId) && new Date(c.createdAt) >= since);
   const mailbox = db.mailbox.filter((m) => siblingIds.has(m.childId)).reverse();
@@ -36,6 +58,38 @@ export default async function FamilyPage({ params }: { params: Promise<{ token: 
         </h1>
       </div>
 
+      {(welcome || child.payer) && siblings.length > 1 && (
+        <InviteCard origin={origin} me={child} siblings={siblings} familyName={family.name} motherName={parent.name} open={Boolean(welcome)} />
+      )}
+
+      {alerts.slice(0, 2).map((a) => (
+        <div key={a.id} className="alert-card">
+          {a.text}
+          <span className="muted"> · {kstLabel(a.at)}</span>
+        </div>
+      ))}
+
+      <section className="card">
+        <h2>
+          ☀️ 오늘 {parent.name} 안부
+          <span className={`tag ${todayCheckin?.answer === 3 || todayCheckin?.callResult === "missed" ? "warn" : todayCheckin?.answer || todayCheckin?.callResult === "answered" ? "ok" : "gray"}`}>
+            {!todayCheckin
+              ? `${parent.checkinTime ?? "09:00"} 문자 예정`
+              : todayCheckin.answer
+                ? ["", "좋아 😊", "그냥 😐", "별로 😟"][todayCheckin.answer]
+                : todayCheckin.callResult === "answered"
+                  ? "확인콜로 확인"
+                  : todayCheckin.callResult === "missed"
+                    ? "응답 없음"
+                    : "답 기다리는 중"}
+          </span>
+        </h2>
+        <ResponseCalendar checkins={checkins} today={today} />
+        <Link className="btn secondary" href={`/f/${token}/sim`} style={{ marginTop: 12 }}>
+          📱 {parent.name} 폰 시뮬레이터 열기
+        </Link>
+      </section>
+
       {open.map((q) => {
         const answered = new Set(db.replies.filter((r) => r.questionId === q.id).map((r) => r.childId));
         const mineDone = answered.has(child.id);
@@ -43,7 +97,7 @@ export default async function FamilyPage({ params }: { params: Promise<{ token: 
           <section className="card" key={q.id}>
             <h2>
               💌 {josa(parent.name, "이", "가")} 물어보셨어요
-              <span className="tag">{untilDeadline(q.deadline)}</span>
+              <span className="tag">{untilDeadline(q.deadline, now)}</span>
             </h2>
             <div className="question">“{q.text}”</div>
             <p className="muted">

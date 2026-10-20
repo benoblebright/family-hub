@@ -1,8 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { createFamily, parseFamilyForm } from "@/lib/family";
 import { findChild, newId, saveAudio, updateDB } from "@/lib/db";
 import { josa } from "@/lib/format";
+import { familyNow, processFamily } from "@/lib/checkin";
 
 export interface FormState {
   ok: boolean;
@@ -69,7 +72,9 @@ export async function submitReply(_: FormState, form: FormData): Promise<FormSta
   });
   if (result) return { ok: false, message: result };
 
-  revalidatePath(`/f/${token}`);
+  // 형제 전원이 답했으면 바로 마감·요약 (R4-3)
+  await processFamily(found.family.id);
+  revalidatePath(`/f/${token}`, "layout");
   return { ok: true, message: "답장을 보냈어요. 마감되면 AI가 모아서 엄마께 전해드려요." };
 }
 
@@ -80,7 +85,7 @@ export async function submitCallCheck(_: FormState, form: FormData): Promise<For
   if (!found) return { ok: false, message: "링크가 올바르지 않아요." };
 
   await updateDB((db) => {
-    db.checks.push({ id: newId(), childId: found.child.id, memo: str(form.get("memo")), createdAt: new Date().toISOString() });
+    db.checks.push({ id: newId(), childId: found.child.id, memo: str(form.get("memo")), createdAt: new Date(familyNow(found.family)).toISOString() });
   });
   revalidatePath(`/f/${token}`);
   const who = josa(found.child.role, "이랑", "랑");
@@ -122,4 +127,13 @@ export async function saveChildSettings(_: FormState, form: FormData): Promise<F
   });
   revalidatePath(`/f/${token}`, "layout");
   return { ok: true, message: "저장했어요." };
+}
+
+// 자가 가입: 가족방 만들기 → 만든 사람의 가족 홈으로 (R2-1 ~ R2-3)
+export async function startFamily(_: FormState, form: FormData): Promise<FormState> {
+  const input = parseFamilyForm(form);
+  if (input.children.length === 0) return { ok: false, message: "내 이름을 적어 주세요." };
+  if (input.parentPhone && !/^[0-9-\s]{9,14}$/.test(input.parentPhone)) return { ok: false, message: "부모님 전화번호를 숫자로 적어 주세요." };
+  const { payerToken } = await createFamily({ ...input, payer: 0 });
+  redirect(`/f/${payerToken}?welcome=1`);
 }

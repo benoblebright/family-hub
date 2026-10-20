@@ -8,6 +8,8 @@ export interface Family {
   plan: Plan;
   status?: "trial" | "active" | "paused";
   createdAt?: string;
+  simOffsetMin?: number; // 시뮬레이터 가상 시계 (빨리감기한 분)
+  lastTick?: string; // 안부 문자 흐름을 마지막으로 처리한 가상 시각
 }
 
 export type Plan = "basic" | "standard" | "premium";
@@ -18,6 +20,7 @@ export interface Parent {
   name: string; // 자녀들이 부르는 호칭: "엄마"
   phone: string; // 대표번호로 들어온 발신번호 식별 키
   callTimes?: string; // 정기 안부콜 시간: "화·목·토 오전 10시"
+  checkinTime?: string; // 매일 아침 안부 문자 시각 (KST) "09:00"
   phoneType?: "2g" | "smart" | "landline";
   notes?: string; // 말 속도, 청력, 사투리 등 통화 설정 메모
   consent?: { recording: boolean; summaryToChildren: boolean; at?: string; how?: string };
@@ -85,6 +88,29 @@ export interface WeeklyReport {
   calls: { answered: number; scheduled: number };
 }
 
+// 매일 아침 안부 문자 한 건의 흐름: 발송 → (2시간 무응답) 재문자 → (1시간 무응답) 확인콜 → (30분 무응답) 형제 알림
+export interface Checkin {
+  id: string;
+  familyId: string;
+  date: string; // KST YYYY-MM-DD
+  sentAt: string;
+  resentAt?: string;
+  callAt?: string;
+  callResult?: "answered" | "missed";
+  answer?: 1 | 2 | 3;
+  answeredAt?: string;
+  alertedAt?: string;
+}
+
+// 시뮬레이터 이벤트 로그 (문자·전화·형제 알림)
+export interface SimEvent {
+  id: string;
+  familyId: string;
+  at: string;
+  kind: "sms_out" | "sms_in" | "call_out" | "call_in" | "alert" | "system";
+  text: string;
+}
+
 // AI 안부콜 기록 (vox 연동 전에는 운영자가 직접 입력)
 export interface Call {
   id: string;
@@ -141,4 +167,6 @@ export interface DB {
   memories: MemoryNote[];
   stories: Story[];
   leads: Lead[];
+  checkins: Checkin[];
+  events: SimEvent[];
 }

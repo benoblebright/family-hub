@@ -26,9 +26,17 @@ export default function Landing() {
           <br />
           부모님은 지금 쓰시는 전화 그대로면 돼요.
         </p>
-        <a className="btn" href="#apply">
-          첫 달 무료로 시작하기
-        </a>
+        <Link className="btn" href="/start">
+          지금 우리 가족방 만들기
+        </Link>
+        <div className="row" style={{ marginTop: 8 }}>
+          <Link className="btn secondary" href="/f/minsu-demo/sim">
+            📱 엄마 폰 체험
+          </Link>
+          <a className="btn secondary" href="#apply">
+            무료 신청
+          </a>
+        </div>
       </header>
 
       <section className="card">
@@ -95,7 +103,7 @@ export default function Landing() {
       </section>
 
       <p className="footer">
-        <Link href="/demo">데모 가족방 둘러보기</Link>
+        <Link href="/demo">데모 가족방·운영자 화면 둘러보기</Link>
       </p>
     </>
   );

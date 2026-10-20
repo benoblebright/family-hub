@@ -1,0 +1,9 @@
+rules_version = '2';
+// 음성 파일도 서버(firebase-admin)를 통해서만 올리고 내려받는다.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

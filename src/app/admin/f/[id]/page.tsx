@@ -6,7 +6,7 @@ import { requireAdminPage } from "@/lib/admin";
 import { familyKpi, pct } from "@/lib/kpi";
 import { planName } from "@/lib/plans";
 import { MEMORY_QUESTIONS, nextMemoryQuestion } from "@/lib/prompts";
-import { timeAgo, untilDeadline, weekStart } from "@/lib/format";
+import { kstDate, kstInputNow, timeAgo, untilDeadline, weekStart } from "@/lib/format";
 import { AdminNav } from "@/components/AdminNav";
 import {
   addCall,
@@ -28,11 +28,6 @@ const TYPE_LABEL = { schedule: "일정형", yesno: "예/아니오형", free: "�
 const KIND = { regular: "정기콜", ars: "엄마 ARS", callback: "원벨 콜백", transfer: "자녀 연결" } as const;
 const FLAGS = ["건강 언급", "기분 저하", "외출 없음", "식사 거름"];
 
-function localNow() {
-  const d = new Date();
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 16);
-}
 
 export default async function FamilyAdmin({ params }: { params: Promise<{ id: string }> }) {
   await requireAdminPage();
@@ -55,7 +50,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
   // 이번 주 리포트가 없으면 이번 주 통화 기록으로 초안을 채운다
   const since = weekStart();
   const weekCalls = calls.filter((c) => new Date(c.at) >= since);
-  const thisWeek = report?.weekOf === since.toISOString().slice(0, 10) ? report : undefined;
+  const thisWeek = report?.weekOf === kstDate(since) ? report : undefined;
   const nextMemory = nextMemoryQuestion(stories.map((s) => s.topic));
   const draft = thisWeek ?? {
     summary: weekCalls.filter((c) => c.summary).map((c) => c.summary!).slice(0, 3),
@@ -132,7 +127,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
                 </option>
               ))}
             </select>
-            <input type="datetime-local" name="at" defaultValue={localNow()} className="grow" />
+            <input type="datetime-local" name="at" defaultValue={kstInputNow()} className="grow" />
           </div>
           <div className="row">
             <label className="check grow">

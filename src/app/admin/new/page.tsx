@@ -2,7 +2,7 @@ import { readDB } from "@/lib/db";
 import { requireAdminPage } from "@/lib/admin";
 import { PLANS } from "@/lib/plans";
 import { AdminNav } from "@/components/AdminNav";
-import { createFamily } from "../actions";
+import { createFamilyAdmin } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +23,7 @@ export default async function NewFamily({ searchParams }: { searchParams: Promis
         <h1>새 가족 등록</h1>
       </div>
 
-      <form action={createFamily}>
+      <form action={createFamilyAdmin}>
         <input type="hidden" name="leadId" value={lead?.id ?? ""} />
         <section className="card">
           <h2>가족</h2>
@@ -57,6 +57,8 @@ export default async function NewFamily({ searchParams }: { searchParams: Promis
           </div>
           <label className="field">전화번호 (대표번호로 걸려오면 이 번호로 가족을 찾아요)</label>
           <input type="text" name="parentPhone" inputMode="tel" required placeholder="010-" />
+          <label className="field" htmlFor="nf-checkin">매일 아침 안부 문자 시각</label>
+          <input type="time" id="nf-checkin" name="checkinTime" defaultValue="09:00" />
           <label className="field">정기 안부콜 시간</label>
           <input type="text" name="callTimes" placeholder="예: 화·목·토 오전 10시" />
           <label className="field">통화 설정 메모</label>

@@ -3,11 +3,12 @@
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { newId, newToken, readDB, updateDB } from "@/lib/db";
-import { classifyQuestion, summarizeReplies } from "@/lib/ai";
+import { newId, updateDB } from "@/lib/db";
+import { createFamily, parseFamilyForm } from "@/lib/family";
+import { closeQuestionWithSummary, openMomQuestion } from "@/lib/checkin";
 import { ADMIN_COOKIE, requireAdmin } from "@/lib/admin";
-import { weekStart } from "@/lib/format";
-import type { Call, Lead, Parent, Plan, Question, WeeklyReport } from "@/lib/types";
+import { fromKstInput, kstDate, weekStart } from "@/lib/format";
+import type { Call, Lead, Question, WeeklyReport } from "@/lib/types";
 
 // 운영자 화면 — 0~1단계에서 vox 웹훅·스케줄러가 할 일을 손으로 대신한다
 
@@ -28,50 +29,11 @@ export async function login(form: FormData) {
 
 // ---- 가족 등록 (온보딩) ----
 
-export async function createFamily(form: FormData) {
+export async function createFamilyAdmin(form: FormData) {
   await requireAdmin();
-  const parentName = str(form.get("parentName")) || "엄마";
-  const plan = (str(form.get("plan")) || "standard") as Plan;
-  const familyId = newId();
-  const now = new Date().toISOString();
-
-  const names = form.getAll("childName").map(str);
-  const roles = form.getAll("childRole").map(str);
-  const phones = form.getAll("childPhone").map(str);
-  const payer = Number(form.get("payer") ?? 0);
-  const children = names
-    .map((name, i) => ({ name, role: roles[i] || `자녀${i + 1}`, phone: phones[i] || undefined, i }))
-    .filter((c) => c.name);
-  if (children.length === 0) throw new Error("자녀를 한 명 이상 등록해 주세요.");
-
-  await updateDB((db) => {
-    db.families.push({ id: familyId, name: str(form.get("familyName")) || `${parentName}네 가족방`, plan, status: "trial", createdAt: now });
-    db.parents.push({
-      id: newId(),
-      familyId,
-      name: parentName,
-      phone: str(form.get("parentPhone")),
-      phoneType: (str(form.get("phoneType")) || "2g") as Parent["phoneType"],
-      callTimes: str(form.get("callTimes")) || undefined,
-      notes: str(form.get("notes")) || undefined,
-      consent: { recording: false, summaryToChildren: false },
-    });
-    for (const c of children) {
-      db.children.push({
-        id: newId(),
-        familyId,
-        name: c.name,
-        role: c.role,
-        phone: c.phone,
-        token: newToken(),
-        payer: c.i === payer,
-        notify: { weekly: true, questions: true },
-      });
-    }
-    const leadId = str(form.get("leadId"));
-    const lead = db.leads.find((l) => l.id === leadId);
-    if (lead) lead.status = "onboarded";
-  });
+  const input = parseFamilyForm(form);
+  if (input.children.length === 0) throw new Error("자녀를 한 명 이상 등록해 주세요.");
+  const { familyId } = await createFamily(input);
   done();
   redirect(`/admin/f/${familyId}`);
 }
@@ -123,43 +85,14 @@ export async function createQuestion(form: FormData) {
   const text = str(form.get("text"));
   const familyId = str(form.get("familyId"));
   if (!text || !familyId) return;
-  const hours = Number(form.get("hours")) || 6;
-  const { type, options } = await classifyQuestion(text);
-
-  await updateDB((db) => {
-    db.questions.push({
-      id: newId(),
-      familyId,
-      text,
-      source: (str(form.get("source")) || "call") as Question["source"],
-      type,
-      options,
-      deadline: new Date(Date.now() + hours * 3600_000).toISOString(),
-      status: "open",
-      createdAt: new Date().toISOString(),
-    });
-  });
+  await openMomQuestion(familyId, text, (str(form.get("source")) || "call") as Question["source"], Number(form.get("hours")) || 6);
   done();
 }
 
-// 마감: 답을 모아 요약 → 엄마께 보낼 문자(단문)·ARS 문구 생성
+// 마감: 답을 모아 요약 → 엄마께 보낼 문자(단문)·전화 문구 생성, 엄마 폰(시뮬레이터)으로 발송
 export async function closeQuestion(form: FormData) {
   await requireAdmin();
-  const id = str(form.get("questionId"));
-  const db = await readDB();
-  const q = db.questions.find((x) => x.id === id);
-  if (!q || q.status === "closed") return;
-  const parent = db.parents.find((p) => p.familyId === q.familyId)!;
-  const children = db.children.filter((c) => c.familyId === q.familyId);
-  const summary = await summarizeReplies(q, parent.name, children, db.replies.filter((r) => r.questionId === q.id));
-
-  await updateDB((fresh) => {
-    const target = fresh.questions.find((x) => x.id === id);
-    if (target) {
-      target.status = "closed";
-      target.summary = summary;
-    }
-  });
+  await closeQuestionWithSummary(str(form.get("questionId")));
   done();
 }
 
@@ -173,7 +106,7 @@ export async function addCall(form: FormData) {
   const call: Call = {
     id: newId(),
     familyId,
-    at: at ? new Date(at).toISOString() : new Date().toISOString(),
+    at: at ? fromKstInput(at) : new Date().toISOString(),
     kind: (str(form.get("kind")) || "regular") as Call["kind"],
     answered,
     minutes: answered ? Number(form.get("minutes")) || 0 : 0,
@@ -246,7 +179,7 @@ export async function saveReport(form: FormData) {
   const report: WeeklyReport = {
     id: newId(),
     familyId,
-    weekOf: weekStart().toISOString().slice(0, 10),
+    weekOf: kstDate(weekStart()),
     summary: lines(form.get("summary")),
     topics: lines(form.get("topics")),
     mood: (str(form.get("mood")) || "보통") as WeeklyReport["mood"],
