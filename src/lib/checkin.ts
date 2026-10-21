@@ -94,6 +94,11 @@ export function momSms(db: DB, familyId: string, text: string, now: number): { q
     }
     c.answer = n;
     c.answeredAt = iso(now);
+    // 확인콜이 울리는 중에 문자로 답하셨으면 확인콜은 끊는다 (중복 처리 방지)
+    if (c.callAt && !c.callResult) {
+      c.callResult = "answered";
+      pushEvent(db, familyId, now, "call_in", "📞 문자로 답하셔서 확인콜을 끊었어요");
+    }
     if (n === 3) {
       c.alertedAt = iso(now);
       pushEvent(db, familyId, now, "sms_out", "[가족방] 그러셨구나. 자녀들에게 전화드리라고 할게요.");

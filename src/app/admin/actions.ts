@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { newId, updateDB } from "@/lib/db";
 import { createFamily, parseFamilyForm } from "@/lib/family";
+import { seed } from "@/lib/seed";
 import { closeQuestionWithSummary, openMomQuestion } from "@/lib/checkin";
 import { ADMIN_COOKIE, requireAdmin } from "@/lib/admin";
 import { fromKstInput, kstDate, weekStart } from "@/lib/format";
@@ -201,6 +202,28 @@ export async function markPlayed(form: FormData) {
   const ids = new Set(form.getAll("id").map(str));
   await updateDB((db) => {
     for (const m of db.mailbox) if (ids.has(m.id)) m.played = true;
+  });
+  done();
+}
+
+// 데모 가족(fam1)을 처음 상태로 되돌린다 — 평가자들이 같은 데모를 만지므로 제출 전·중간에 사용
+export async function resetDemo() {
+  await requireAdmin();
+  const fresh = seed();
+  await updateDB((db) => {
+    const fid = "fam1";
+    const kids = new Set(db.children.filter((c) => c.familyId === fid).map((c) => c.id));
+    const qs = new Set(db.questions.filter((q) => q.familyId === fid).map((q) => q.id));
+    db.families = db.families.filter((x) => x.id !== fid).concat(fresh.families);
+    db.parents = db.parents.filter((x) => x.familyId !== fid).concat(fresh.parents);
+    db.children = db.children.filter((x) => x.familyId !== fid).concat(fresh.children);
+    db.questions = db.questions.filter((x) => x.familyId !== fid).concat(fresh.questions);
+    db.replies = db.replies.filter((x) => !qs.has(x.questionId)).concat(fresh.replies);
+    db.checks = db.checks.filter((x) => !kids.has(x.childId)).concat(fresh.checks);
+    db.mailbox = db.mailbox.filter((x) => !kids.has(x.childId)).concat(fresh.mailbox);
+    for (const k of ["reports", "calls", "memories", "stories", "checkins", "events"] as const) {
+      (db[k] as { familyId: string }[]) = (db[k] as { familyId: string }[]).filter((x) => x.familyId !== fid).concat(fresh[k] as { familyId: string }[]);
+    }
   });
   done();
 }

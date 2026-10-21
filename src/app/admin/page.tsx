@@ -5,7 +5,7 @@ import { familyKpi, pct } from "@/lib/kpi";
 import { planName, PLANS, won } from "@/lib/plans";
 import { timeAgo } from "@/lib/format";
 import { AdminNav } from "@/components/AdminNav";
-import { setLeadStatus } from "./actions";
+import { resetDemo, setLeadStatus } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -101,6 +101,9 @@ export default async function AdminHome() {
         <Link className="btn secondary" href="/admin/new" style={{ marginTop: 12 }}>
           + 새 가족 등록
         </Link>
+        <form action={resetDemo} style={{ marginTop: 8 }}>
+          <button className="btn small secondary">↺ 데모 가족(엄마네 가족방) 처음 상태로</button>
+        </form>
       </section>
 
       <section className="card">
