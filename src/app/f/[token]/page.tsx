@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
@@ -63,20 +64,25 @@ export default async function FamilyPage({
       )}
 
       {alerts.slice(0, 2).map((a) => (
-        <div key={a.id} className="alert-card">
-          {a.text}
-          <span className="muted"> · {kstLabel(a.at)}</span>
+        <div key={a.id} className="alert-card" role="status">
+          <Icon name="notifications_active" fill />
+          <span>
+            {a.text.replace(/^[^\p{L}\p{N}]+/u, "")}
+            <span className="muted" style={{ display: "block", color: "inherit", opacity: 0.8 }}>
+              {kstLabel(a.at)}
+            </span>
+          </span>
         </div>
       ))}
 
       <section className="card">
         <h2>
-          ☀️ 오늘 {parent.name} 안부
+          <Icon name="wb_sunny" /> 오늘 {parent.name} 안부
           <span className={`tag ${todayCheckin?.answer === 3 || todayCheckin?.callResult === "missed" ? "warn" : todayCheckin?.answer || todayCheckin?.callResult === "answered" ? "ok" : "gray"}`}>
             {!todayCheckin
               ? `${parent.checkinTime ?? "09:00"} 문자 예정`
               : todayCheckin.answer
-                ? ["", "좋아 😊", "그냥 😐", "별로 😟"][todayCheckin.answer]
+                ? ["", "좋아", "그냥", "별로"][todayCheckin.answer]
                 : todayCheckin.callResult === "answered"
                   ? "확인콜로 확인"
                   : todayCheckin.callResult === "missed"
@@ -86,7 +92,7 @@ export default async function FamilyPage({
         </h2>
         <ResponseCalendar checkins={checkins} today={today} />
         <Link className="btn secondary" href={`/f/${token}/sim`} style={{ marginTop: 12 }}>
-          📱 {parent.name} 폰 시뮬레이터 열기
+          <Icon name="smartphone" /> {parent.name} 폰 시뮬레이터 열기
         </Link>
       </section>
 
@@ -96,7 +102,7 @@ export default async function FamilyPage({
         return (
           <section className="card" key={q.id}>
             <h2>
-              💌 {josa(parent.name, "이", "가")} 물어보셨어요
+              <Icon name="mail" /> {josa(parent.name, "이", "가")} 물어보셨어요
               <span className="tag">{untilDeadline(q.deadline, now)}</span>
             </h2>
             <div className="question">“{q.text}”</div>
@@ -114,7 +120,7 @@ export default async function FamilyPage({
       {report && (
         <section className="card">
           <h2>
-            📋 AI 안부콜 주간 요약
+            <Icon name="summarize" /> AI 안부콜 주간 요약
             <span className={`tag ${MOOD_TAG[report.mood]}`}>기분 {report.mood}</span>
           </h2>
           <ul className="plain">
@@ -130,7 +136,7 @@ export default async function FamilyPage({
 
       {report && (
         <section className="card">
-          <h2>💬 이번 주 {parent.name}께 물어볼 것</h2>
+          <h2><Icon name="forum" /> 이번 주 {parent.name}께 물어볼 것</h2>
           <ol className="topics">
             {report.topics.map((t) => (
               <li key={t}>{t}</li>
@@ -141,7 +147,7 @@ export default async function FamilyPage({
 
       <section className="card">
         <h2>
-          📞 이번 주 누가 통화했나
+          <Icon name="call" /> 이번 주 누가 통화했나
           <span className="tag ok">{weekChecks.length}번</span>
         </h2>
         <ul className="plain" style={{ marginBottom: 14 }}>
@@ -168,7 +174,7 @@ export default async function FamilyPage({
 
       <section className="card">
         <h2>
-          📮 {parent.name} 우체통
+          <Icon name="markunread_mailbox" /> {parent.name} 우체통
           <span className="tag">{unplayed > 0 ? `안 들으신 소식 ${unplayed}개` : "비었어요"}</span>
         </h2>
         <p className="muted">
@@ -192,7 +198,7 @@ export default async function FamilyPage({
 
       {closed.length > 0 && (
         <section className="card">
-          <h2>✅ 지난 질문</h2>
+          <h2><Icon name="task_alt" /> 지난 질문</h2>
           <ul className="plain">
             {closed.map((q) => (
               <li key={q.id}>
@@ -206,10 +212,10 @@ export default async function FamilyPage({
 
       <div className="row" style={{ marginTop: 6 }}>
         <Link className="btn secondary" href={`/f/${token}/news`}>
-          📰 이달의 가족신문
+          <Icon name="newspaper" /> 이달의 가족신문
         </Link>
         <Link className="btn secondary" href={`/f/${token}/settings`}>
-          ⚙️ 내 설정
+          <Icon name="settings" /> 내 설정
         </Link>
       </div>
 

@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { findChild } from "@/lib/db";
@@ -54,7 +55,7 @@ export default async function ReplyPage({ params }: { params: Promise<{ token: s
                   <b>{s.role}</b> {s.id === child.id && <span className="muted">(나)</span>}
                   <br />
                   <span className="muted">
-                    {r ? [r.choice, r.hideFromMom ? "메모(엄마께는 비공개)" : r.text, r.audio && "🎙️ 음성"].filter(Boolean).join(" · ") : "아직 답 없음"}
+                    {r ? [r.choice, r.hideFromMom ? "메모(엄마께는 비공개)" : r.text, r.audio && "음성 답장"].filter(Boolean).join(" · ") : "아직 답 없음"}
                   </span>
                 </span>
                 {r ? <span className="tag ok">답함</span> : <span className="tag gray">대기</span>}
@@ -74,7 +75,7 @@ export default async function ReplyPage({ params }: { params: Promise<{ token: s
         q.summary && (
           <section className="card">
             <h2>{parent.name}께 전해드린 내용</h2>
-            <div className="sms">📱 {q.summary.sms}</div>
+            <div className="sms"><Icon name="smartphone" /> {q.summary.sms}</div>
             <p>{q.summary.long}</p>
           </section>
         )

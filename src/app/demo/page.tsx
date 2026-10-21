@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 import { readDB } from "@/lib/db";
 
@@ -31,7 +32,7 @@ export default async function Demo() {
         <h2>엄마 폰 시뮬레이터</h2>
         <p className="muted">아침 안부 문자 → 숫자 답장 / 무응답 → 재문자 → 확인콜 → 모두에게 알림을 시간 빨리감기로 재현해요.</p>
         <Link className="btn" href="/f/minsu-demo/sim" style={{ marginTop: 10 }}>
-          📱 시뮬레이터 열기
+          <Icon name="smartphone" /> 시뮬레이터 열기
         </Link>
       </section>
       <section className="card">

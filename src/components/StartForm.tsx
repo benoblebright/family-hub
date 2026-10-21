@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@/components/Icon";
 import { useActionState } from "react";
 import { startFamily, type FormState } from "@/app/actions";
 
@@ -57,7 +58,7 @@ export function StartForm() {
         ))}
       </section>
 
-      {state.message && <p className="muted">⚠️ {state.message}</p>}
+      {state.message && <p className="muted"><Icon name="error" /> {state.message}</p>}
       <button className="btn" disabled={pending}>
         {pending ? "만드는 중…" : "가족방 만들기"}
       </button>

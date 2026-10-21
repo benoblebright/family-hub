@@ -1,11 +1,12 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 import { PLANS, won } from "@/lib/plans";
 import { LeadForm } from "@/components/LeadForm";
 
 const STEPS = [
-  { icon: "☎️", title: "엄마는 전화만", body: "앱 설치 없이, 2G폰·집전화 그대로. 주 2~3회 AI가 다정하게 안부 전화를 드리고, 한 번 울리고 끊으시면 다시 걸어드려요." },
-  { icon: "💬", title: "형제·가족·친구는 카톡 링크로", body: "통화 요약과 '이번 주 엄마께 물어볼 것 3가지'가 함께하는 모두에게 가요. 누가 이번 주에 통화했는지도 한눈에." },
-  { icon: "🔁", title: "엄마가 먼저 물어요", body: "\"추석에 다들 언제 오니?\" 엄마 질문이 함께하는 사람들에게 가고, 각자 답하면 AI가 모아서 엄마께 전화로 들려드려요." },
+  { icon: "call", title: "엄마는 전화만", body: "앱 설치 없이, 2G폰·집전화 그대로. 주 2~3회 AI가 다정하게 안부 전화를 드리고, 한 번 울리고 끊으시면 다시 걸어드려요." },
+  { icon: "forum", title: "형제·가족·친구는 카톡 링크로", body: "통화 요약과 '이번 주 엄마께 물어볼 것 3가지'가 함께하는 모두에게 가요. 누가 이번 주에 통화했는지도 한눈에." },
+  { icon: "sync_alt", title: "엄마가 먼저 물어요", body: "\"추석에 다들 언제 오니?\" 엄마 질문이 함께하는 사람들에게 가고, 각자 답하면 AI가 모아서 엄마께 전화로 들려드려요." },
 ];
 
 const FAQ = [
@@ -31,7 +32,7 @@ export default function Landing() {
         </Link>
         <div className="row" style={{ marginTop: 8 }}>
           <Link className="btn secondary" href="/f/minsu-demo/sim">
-            📱 엄마 폰 체험
+            <Icon name="smartphone" /> 엄마 폰 체험
           </Link>
           <a className="btn secondary" href="#apply">
             무료 신청
@@ -44,7 +45,7 @@ export default function Landing() {
         <ul className="plain">
           {STEPS.map((s) => (
             <li key={s.title} className="row" style={{ alignItems: "flex-start" }}>
-              <span className="avatar">{s.icon}</span>
+              <span className="avatar"><Icon name={s.icon} /></span>
               <span className="grow">
                 <b>{s.title}</b>
                 <br />

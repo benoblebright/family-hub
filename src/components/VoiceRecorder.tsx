@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@/components/Icon";
 import { useEffect, useRef, useState } from "react";
 
 // 브라우저에서 바로 녹음 → 숨은 file input(name)에 담아 폼과 함께 전송
@@ -65,7 +66,7 @@ export default function VoiceRecorder({ name = "audio", label = "목소리로 �
       <input ref={inputRef} type="file" name={name} accept="audio/*" hidden />
       {state === "idle" && (
         <button type="button" className="btn secondary" onClick={start}>
-          🎙️ {label}
+          <Icon name="mic" /> {label}
         </button>
       )}
       {state === "recording" && (

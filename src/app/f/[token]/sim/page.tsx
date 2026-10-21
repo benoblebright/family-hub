@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { findChild } from "@/lib/db";
@@ -31,7 +32,7 @@ export default async function Simulator({ params }: { params: Promise<{ token: s
     <>
       <div className="hello">
         <small>{family.name} · 실제 문자 대신 화면으로 재현해요</small>
-        <h1>📱 {parent.name} 폰 시뮬레이터</h1>
+        <h1><Icon name="smartphone" /> {parent.name} 폰 시뮬레이터</h1>
       </div>
 
       <section className="card sim-clock">
@@ -60,11 +61,11 @@ export default async function Simulator({ params }: { params: Promise<{ token: s
           <form action={simForward}>
             {T("token", token)}
             {T("minutes", "next")}
-            <button className="btn small">⏩ 다음 안부 문자 ({parent.checkinTime ?? "09:00"})</button>
+            <button className="btn small"><Icon name="fast_forward" /> 다음 안부 문자 ({parent.checkinTime ?? "09:00"})</button>
           </form>
           <form action={simReset}>
             {T("token", token)}
-            <button className="btn small secondary">↺ 지금으로</button>
+            <button className="btn small secondary"><Icon name="restart_alt" /> 지금으로</button>
           </form>
         </div>
       </section>
@@ -72,7 +73,7 @@ export default async function Simulator({ params }: { params: Promise<{ token: s
       <div className="phone">
         <div className="phone-top">
           <span>{kstTime(now)}</span>
-          <span>📶 🔋</span>
+          <span><Icon name="signal_cellular_alt" /> <Icon name="battery_full" /></span>
         </div>
         <div className="phone-screen">
           {ringing ? (
@@ -99,7 +100,7 @@ export default async function Simulator({ params }: { params: Promise<{ token: s
           ) : sms.length === 0 ? (
             <p className="muted" style={{ textAlign: "center", marginTop: 40 }}>
               아직 문자가 없어요.
-              <br />⏩ 버튼으로 다음 안부 문자 시각까지 가 보세요.
+              <br /><Icon name="fast_forward" /> 버튼으로 다음 안부 문자 시각까지 가 보세요.
             </p>
           ) : (
             sms.map((e) => (

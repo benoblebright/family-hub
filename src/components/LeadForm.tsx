@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@/components/Icon";
 import { useActionState } from "react";
 import { submitLead, type FormState } from "@/app/actions";
 import { PLANS } from "@/lib/plans";
@@ -48,7 +49,7 @@ export function LeadForm() {
       <label className="check">
         <input type="checkbox" name="agree" required /> 연락을 위한 개인정보 수집·이용에 동의해요 (이름·연락처, 상담 후 3개월 보관)
       </label>
-      {state.message && <p className="muted">⚠️ {state.message}</p>}
+      {state.message && <p className="muted"><Icon name="error" /> {state.message}</p>}
       <button className="btn" disabled={pending}>
         {pending ? "보내는 중…" : "첫 달 무료 신청하기"}
       </button>

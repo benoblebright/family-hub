@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 import { readDB } from "@/lib/db";
 import { requireAdminPage } from "@/lib/admin";
@@ -59,7 +60,7 @@ export default async function AdminHome() {
 
       {alerts.length > 0 && (
         <section className="card">
-          <h2>⚠️ 확인할 가족</h2>
+          <h2><Icon name="error" /> 확인할 가족</h2>
           <ul className="plain">
             {alerts.map(({ f, kpi }) => (
               <li key={f.id}>
@@ -78,7 +79,7 @@ export default async function AdminHome() {
 
       <section className="card">
         <h2>
-          👪 가족 <span className="tag gray">AI {hasAI ? "Claude" : "템플릿"}</span>
+          <Icon name="family_restroom" /> 가족 <span className="tag gray">AI {hasAI ? "Claude" : "템플릿"}</span>
         </h2>
         <ul className="plain">
           {rows.map(({ f, parent, kpi, open }) => (
@@ -93,7 +94,7 @@ export default async function AdminHome() {
                 {planName(f.plan)} · {parent?.callTimes ?? "콜 시간 미정"} · 응답률 {pct(kpi.answerRate)} · 평균 {kpi.avgMinutes ?? "–"}분 · 가족
                 통화 {kpi.siblingCalls}번 · 답장률 {pct(kpi.replyRate)}
                 {open > 0 && ` · 열린 질문 ${open}`}
-                {!parent?.consent?.recording && " · ⚠️ 녹음 동의 전"}
+                {!parent?.consent?.recording && " · 녹음 동의 전"}
               </div>
             </li>
           ))}
@@ -102,13 +103,13 @@ export default async function AdminHome() {
           + 새 가족 등록
         </Link>
         <form action={resetDemo} style={{ marginTop: 8 }}>
-          <button className="btn small secondary">↺ 데모 가족(엄마네 가족방) 처음 상태로</button>
+          <button className="btn small secondary"><Icon name="restart_alt" /> 데모 가족(엄마네 가족방) 처음 상태로</button>
         </form>
       </section>
 
       <section className="card">
         <h2>
-          📝 첫 달 무료 신청 <span className="tag">{leads.length}명</span>
+          <Icon name="edit_note" /> 첫 달 무료 신청 <span className="tag">{leads.length}명</span>
         </h2>
         {leads.length === 0 && <p className="muted">아직 신청이 없어요. 랜딩페이지(/)를 지인들에게 공유해 보세요.</p>}
         <ul className="plain">

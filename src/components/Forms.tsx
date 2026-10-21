@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@/components/Icon";
 import { useActionState, useState } from "react";
 import { submitCallCheck, submitMailbox, submitReply, type FormState } from "@/app/actions";
 import VoiceRecorder from "./VoiceRecorder";
@@ -9,7 +10,7 @@ const initial: FormState = { ok: false, message: "" };
 
 function Result({ state }: { state: FormState }) {
   if (!state.message) return null;
-  return state.ok ? <div className="notice">{state.message}</div> : <p className="muted">⚠️ {state.message}</p>;
+  return state.ok ? <div className="notice">{state.message}</div> : <p className="muted"><Icon name="error" /> {state.message}</p>;
 }
 
 export function ReplyForm({ token, questionId, options }: { token: string; questionId: string; options: string[] }) {
@@ -59,7 +60,7 @@ export function CallCheckForm({ token, motherName }: { token: string; motherName
   if (!open)
     return (
       <button type="button" className="btn ok" onClick={() => setOpen(true)}>
-        📞 {josa(motherName, "이랑", "랑")} 통화했어요
+        <Icon name="call" /> {josa(motherName, "이랑", "랑")} 통화했어요
       </button>
     );
 

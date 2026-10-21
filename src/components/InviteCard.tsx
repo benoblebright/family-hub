@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Icon } from "./Icon";
 import type { Child } from "@/lib/types";
 
 // 가족 초대 링크 (R2-2) — 알림톡 연동 전에는 카톡으로 직접 보낸다
@@ -23,7 +24,7 @@ export function InviteCard(props: { origin: string; me: Child; siblings: Child[]
   return (
     <details className="card" open={props.open}>
       <summary>
-        <b>{props.open ? "🎉 가족방이 만들어졌어요! 함께할 사람을 초대하세요" : "👥 초대 링크"}</b>
+        <b className="summary-title"><Icon name={props.open ? "celebration" : "group_add"} /> {props.open ? "가족방이 만들어졌어요! 함께할 사람을 초대하세요" : "초대 링크"}</b>
       </summary>
       <ul className="plain" style={{ marginTop: 10 }}>
         {others.map((s) => (
@@ -36,7 +37,7 @@ export function InviteCard(props: { origin: string; me: Child; siblings: Child[]
               </span>
             </span>
             <button type="button" className="btn small secondary" onClick={() => copy(s)}>
-              {copied === s.id ? "복사됨 ✓" : "초대 문구 복사"}
+              {copied === s.id ? "복사됨" : "초대 문구 복사"}
             </button>
           </li>
         ))}

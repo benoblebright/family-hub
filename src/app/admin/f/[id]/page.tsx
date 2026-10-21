@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
@@ -85,7 +86,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
           </form>
         ))}
         <Link className="btn small secondary" href={`/f/${children[0]?.token}/news`}>
-          📰 가족신문
+          <Icon name="newspaper" /> 가족신문
         </Link>
       </div>
 
@@ -111,11 +112,11 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
       </div>
       <p className="muted" style={{ margin: "-6px 4px 14px" }}>
         최근 {kpi.days}일 기준 · 통화 {kpi.totalMinutes}분 (vox 기준 원가 약 {Math.round(kpi.totalMinutes * 252).toLocaleString()}원)
-        {kpi.missedStreak >= 2 && ` · ⚠️ ${kpi.missedStreak}번 연속 미응답`}
+        {kpi.missedStreak >= 2 && ` · ${kpi.missedStreak}번 연속 미응답`}
       </p>
 
       <section className="card">
-        <h2>📞 통화 기록 남기기</h2>
+        <h2><Icon name="call" /> 통화 기록 남기기</h2>
         <p className="muted">vox 연동 전까지 안부콜 결과를 여기에 적어요. 엄마 질문을 적으면 함께하는 사람들에게 바로 질문이 열려요.</p>
         <form action={addCall} style={{ marginTop: 10 }}>
           <input type="hidden" name="familyId" value={id} />
@@ -180,7 +181,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
               <form action={deleteCall}>
                 <input type="hidden" name="id" value={c.id} />
                 <button className="btn small secondary" aria-label="통화 기록 삭제">
-                  ✕
+                  <Icon name="close" />
                 </button>
               </form>
             </li>
@@ -189,7 +190,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
       </section>
 
       <section className="card">
-        <h2>💌 엄마 질문</h2>
+        <h2><Icon name="mail" /> 엄마 질문</h2>
         <form action={createQuestion}>
           <input type="hidden" name="familyId" value={id} />
           <input type="text" name="text" placeholder="예: 김장 같이 할 사람 있니?" required />
@@ -247,9 +248,9 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
                 q.summary && (
                   <>
                     <div className="sms">
-                      📱 문자 ({q.summary.sms.length}자): {q.summary.sms}
+                      <Icon name="smartphone" /> 문자 ({q.summary.sms.length}자): {q.summary.sms}
                     </div>
-                    <div className="sms">📞 ARS: {q.summary.long}</div>
+                    <div className="sms"><Icon name="call" /> ARS: {q.summary.long}</div>
                   </>
                 )
               )}
@@ -259,7 +260,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
       </section>
 
       <section className="card">
-        <h2>📋 이번 주 요약 {thisWeek ? <span className="tag ok">발행됨</span> : <span className="tag">통화 기록으로 초안</span>}</h2>
+        <h2><Icon name="summarize" /> 이번 주 요약 {thisWeek ? <span className="tag ok">발행됨</span> : <span className="tag">통화 기록으로 초안</span>}</h2>
         <form action={saveReport}>
           <input type="hidden" name="familyId" value={id} />
           <label className="field">3줄 요약 (한 줄에 하나)</label>
@@ -280,7 +281,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
       </section>
 
       <section className="card">
-        <h2>🧠 기억 노트 <span className="tag gray">다음 통화에 주입</span></h2>
+        <h2><Icon name="psychology" /> 기억 노트 <span className="tag gray">다음 통화에 주입</span></h2>
         <ul className="plain" style={{ marginBottom: 10 }}>
           {memories.map((m) => (
             <li key={m.id} className="row">
@@ -288,7 +289,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
               <form action={deleteMemory}>
                 <input type="hidden" name="id" value={m.id} />
                 <button className="btn small secondary" aria-label="기억 노트 삭제">
-                  ✕
+                  <Icon name="close" />
                 </button>
               </form>
             </li>
@@ -304,7 +305,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
       </section>
 
       <section className="card">
-        <h2>📖 회상 이야기 <span className="tag gray">{stories.length}편</span></h2>
+        <h2><Icon name="menu_book" /> 회상 이야기 <span className="tag gray">{stories.length}편</span></h2>
         <p className="muted">다음 회상 질문: “{nextMemory.q}”</p>
         <ul className="plain" style={{ margin: "10px 0" }}>
           {stories.map((s) => (
@@ -327,7 +328,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
 
       <section className="card">
         <h2>
-          📮 우체통 <span className="tag">{mailbox.length}개 대기</span>
+          <Icon name="markunread_mailbox" /> 우체통 <span className="tag">{mailbox.length}개 대기</span>
         </h2>
         {mailbox.length === 0 ? (
           <p className="muted">비었어요. 함께하는 사람들에게 &ldquo;엄마 우체통이 비었어요&rdquo; 알림을 보낼 때예요.</p>
@@ -339,7 +340,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
       </section>
 
       <section className="card">
-        <h2>👵 {parent.name} 정보 · 동의</h2>
+        <h2><Icon name="elderly_woman" /> {parent.name} 정보 · 동의</h2>
         <p className="muted">
           {parent.phone} · {{ "2g": "2G폰", smart: "스마트폰", landline: "집전화" }[parent.phoneType ?? "2g"]}
           {parent.consent?.at && ` · 동의 기록 ${timeAgo(parent.consent.at)} (${parent.consent.how})`}
@@ -360,7 +361,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
       </section>
 
       <section className="card">
-        <h2>🔗 함께하는 사람 링크 · 알림톡 문구</h2>
+        <h2><Icon name="link" /> 함께하는 사람 링크 · 알림톡 문구</h2>
         <p className="muted">알림톡 연동 전에는 아래 문구를 카톡으로 직접 보내세요.</p>
         {children.map((c) => (
           <div key={c.id} style={{ marginTop: 12 }}>

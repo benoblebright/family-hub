@@ -1,3 +1,4 @@
+import { Icon } from "@/components/Icon";
 import type { Checkin } from "@/lib/types";
 import { addDays } from "@/lib/format";
 
@@ -5,13 +6,13 @@ import { addDays } from "@/lib/format";
 const DOW = ["월", "화", "수", "목", "금", "토", "일"];
 
 function mark(c?: Checkin): [string, string, string] {
-  if (!c) return ["", "·", "기록 없음"];
-  if (c.answer === 1) return ["a1", "😊", "좋아"];
-  if (c.answer === 2) return ["a2", "😐", "그냥"];
-  if (c.answer === 3) return ["a3", "😟", "별로"];
-  if (c.callResult === "answered") return ["a1", "📞", "확인콜로 확인"];
-  if (c.callResult === "missed") return ["miss", "✕", "무응답 → 모두에게 알림"];
-  return ["", "⏳", "답 기다리는 중"];
+  if (!c) return ["", "", "기록 없음"];
+  if (c.answer === 1) return ["a1", "sentiment_satisfied", "좋아"];
+  if (c.answer === 2) return ["a2", "sentiment_neutral", "그냥"];
+  if (c.answer === 3) return ["a3", "sentiment_dissatisfied", "별로"];
+  if (c.callResult === "answered") return ["a1", "phone_callback", "확인콜로 확인"];
+  if (c.callResult === "missed") return ["miss", "phone_missed", "무응답 → 모두에게 알림"];
+  return ["", "hourglass_top", "답 기다리는 중"];
 }
 
 export function ResponseCalendar({ checkins, today }: { checkins: Checkin[]; today: string }) {
@@ -36,18 +37,18 @@ export function ResponseCalendar({ checkins, today }: { checkins: Checkin[]; tod
           return (
             <div key={d} className={`day ${cls} ${d === today ? "today" : ""}`} title={`${d} ${label}`} aria-label={`${d} ${label}`}>
               <small>{Number(d.slice(8, 10))}</small>
-              {icon}
+              {icon && <Icon name={icon} />}
             </div>
           );
         })}
       </div>
       <div className="legend">
-        <span>😊 좋아</span>
-        <span>😐 그냥</span>
-        <span>😟 별로</span>
-        <span>📞 확인콜</span>
-        <span>✕ 무응답</span>
-        <span>· 기록 없음</span>
+        <span><Icon name="sentiment_satisfied" /> 좋아</span>
+        <span><Icon name="sentiment_neutral" /> 그냥</span>
+        <span><Icon name="sentiment_dissatisfied" /> 별로</span>
+        <span><Icon name="phone_callback" /> 확인콜</span>
+        <span><Icon name="phone_missed" /> 무응답</span>
+        <span>빈칸 = 기록 없음</span>
       </div>
       <p className="muted" style={{ marginTop: 6 }}>
         최근 7일 중 {answered}일 응답하셨어요.

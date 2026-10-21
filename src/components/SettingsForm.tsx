@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@/components/Icon";
 import { useActionState } from "react";
 import { saveChildSettings, type FormState } from "@/app/actions";
 import { josa } from "@/lib/format";
@@ -19,7 +20,7 @@ export function SettingsForm(props: { token: string; motherName: string; availab
       <label className="check">
         <input type="checkbox" name="questions" defaultChecked={props.questions} /> {props.motherName} 질문 알림 받기
       </label>
-      {state.message && (state.ok ? <div className="notice">{state.message}</div> : <p className="muted">⚠️ {state.message}</p>)}
+      {state.message && (state.ok ? <div className="notice">{state.message}</div> : <p className="muted"><Icon name="error" /> {state.message}</p>)}
       <button className="btn" disabled={pending}>
         {pending ? "저장 중…" : "저장"}
       </button>
