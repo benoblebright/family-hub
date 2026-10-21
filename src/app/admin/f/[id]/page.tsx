@@ -374,7 +374,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
               </Link>
             </div>
             <p className="muted">
-              {c.phone ?? "번호 없음"} · 연결 가능 {c.availableHours ?? "미설정"} · 알림 {c.notify?.weekly === false ? "주간 끔" : "주간"}/
+              {c.phone ?? "번호 없음"} · 통화 편한 시간 {c.availableHours ?? "미설정"} · 알림 {c.notify?.weekly === false ? "주간 끔" : "주간"}/
               {c.notify?.questions === false ? "질문 끔" : "질문"}
             </p>
             <textarea className="copy" readOnly defaultValue={weeklyMsg(c.token, c.name)} />

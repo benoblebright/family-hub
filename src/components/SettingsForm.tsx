@@ -12,8 +12,8 @@ export function SettingsForm(props: { token: string; motherName: string; availab
   return (
     <form action={action}>
       <input type="hidden" name="token" value={props.token} />
-      <label className="field">{josa(props.motherName, "이", "가")} &ldquo;지금 통화하고 싶다&rdquo; 하실 때 바로 연결해도 되는 시간</label>
-      <input type="text" name="availableHours" defaultValue={props.availableHours} placeholder="예: 19:00-22:00 (비우면 알림으로만 전해요)" />
+      <label className="field">{josa(props.motherName, "이", "가")} &ldquo;지금 통화하고 싶다&rdquo; 하실 때 알림 받기 편한 시간</label>
+      <input type="text" name="availableHours" defaultValue={props.availableHours} placeholder="예: 19:00-22:00 (비우면 언제든 알려 드려요)" />
       <label className="check">
         <input type="checkbox" name="weekly" defaultChecked={props.weekly} /> 주간 안부 요약 알림 받기
       </label>

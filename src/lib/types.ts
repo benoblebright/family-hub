@@ -33,7 +33,7 @@ export interface Child {
   role: string; // "큰아들", "딸", "막내"
   token: string; // 알림톡 링크용 토큰 (로그인 대신)
   phone?: string;
-  availableHours?: string; // 실시간 연결 가능 시간대: "19:00-22:00"
+  availableHours?: string; // "지금 전화해 주세요" 알림을 받기 편한 시간: "19:00-22:00"
   notify?: { weekly: boolean; questions: boolean };
   payer?: boolean; // 대표 결제자
 }

@@ -82,7 +82,7 @@ export default function Landing() {
         </section>
       ))}
       <p className="muted" style={{ margin: "0 4px 18px" }}>
-        연간 결제 시 2개월 무료 · 어버이날·명절 선물용 3개월권도 준비 중이에요.
+        연간 결제 시 2개월 무료 · 1년 치 이야기를 엮은 회고록 책은 별도 상품으로 준비 중이에요.
       </p>
 
       <section className="card" id="apply">

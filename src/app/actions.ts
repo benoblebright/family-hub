@@ -115,7 +115,7 @@ export async function submitMailbox(_: FormState, form: FormData): Promise<FormS
   return { ok: true, message: "우체통에 넣었어요. 엄마가 전화하시면 제일 먼저 들려드려요." };
 }
 
-// 자녀 설정: 실시간 연결 가능 시간대, 알림 수신
+// 내 설정: 전화 받기 편한 시간("지금 전화해 주세요" 알림을 보낼 시간), 알림 수신
 export async function saveChildSettings(_: FormState, form: FormData): Promise<FormState> {
   const token = str(form.get("token"));
   const found = token ? await findChild(token) : null;
