@@ -62,7 +62,7 @@ export function seed(): DB {
         source: "sms",
         type: "schedule",
         options: ["토요일", "일요일", "월요일", "못 가요"],
-        deadline: hoursFromNow(6),
+        deadline: hoursFromNow(24 * 3), // 평가자가 언제 들어와도 답할 질문이 보이도록 넉넉하게
         status: "open",
         createdAt: hoursFromNow(-3),
       },

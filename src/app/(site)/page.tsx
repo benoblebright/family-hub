@@ -9,6 +9,13 @@ const STEPS = [
   { icon: "sync_alt", title: "엄마가 먼저 물어요", body: "\"추석에 다들 언제 오니?\" 엄마 질문이 함께하는 사람들에게 가고, 각자 답하면 AI가 모아서 엄마께 전화로 들려드려요." },
 ];
 
+// 들어오는 길을 역할별로 나눈다
+const ENTRIES = [
+  { href: "/start", icon: "add_home", title: "우리 가족방 만들기", body: "부모님 정보와 함께할 사람을 적으면 1분이면 끝나요" },
+  { href: "/f/minsu-demo", icon: "family_restroom", title: "데모 가족방 둘러보기", body: "큰아들 민수로 들어가 질문·우체통·가족신문을 써 보세요" },
+  { href: "/f/minsu-demo/sim", icon: "smartphone", title: "엄마 폰 체험하기", body: "아침 안부 문자에 답하고, 시간을 빨리 감아 확인콜까지" },
+];
+
 const FAQ = [
   { q: "위급상황도 알려주나요?", a: "응급 관제 서비스가 아니에요. 연속으로 전화를 안 받으시거나 아프다는 말씀이 있으면 함께하는 사람들에게 알려드리는 데까지만 해요. 응급 상황은 119와 지자체 돌봄 서비스를 함께 이용해 주세요." },
   { q: "통화 녹음은 부모님이 동의하셔야 하나요?", a: "네. 첫 통화에서 부모님께 녹음·요약 동의를 음성으로 받고, 동의하지 않으시면 녹음 없이 안부만 여쭤요." },
@@ -30,15 +37,23 @@ export default function Landing() {
         <Link className="btn" href="/start">
           지금 우리 가족방 만들기
         </Link>
-        <div className="row" style={{ marginTop: 8 }}>
-          <Link className="btn secondary" href="/f/minsu-demo/sim">
-            <Icon name="smartphone" /> 엄마 폰 체험
-          </Link>
-          <a className="btn secondary" href="#apply">
-            무료 신청
-          </a>
-        </div>
       </header>
+
+      <h2 className="section-title">어떻게 시작할까요?</h2>
+      <div className="entry-grid">
+        {ENTRIES.map((e) => (
+          <Link key={e.href} href={e.href} className="card link-card entry">
+            <span className="entry-icon">
+              <Icon name={e.icon} />
+            </span>
+            <span className="grow">
+              <b>{e.title}</b>
+              <span className="muted block">{e.body}</span>
+            </span>
+            <Icon name="chevron_right" />
+          </Link>
+        ))}
+      </div>
 
       <section className="card">
         <h2>이렇게 돌아가요</h2>
@@ -104,7 +119,7 @@ export default function Landing() {
       </section>
 
       <p className="footer">
-        <Link href="/demo">데모 가족방·운영자 화면 둘러보기</Link>
+        <Link href="/demo">다른 사람으로 데모 들어가기</Link> · <Link href="/admin">운영자</Link>
       </p>
     </>
   );

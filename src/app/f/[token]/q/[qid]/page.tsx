@@ -82,7 +82,7 @@ export default async function ReplyPage({ params }: { params: Promise<{ token: s
       )}
 
       <p className="footer">
-        <Link href={`/f/${token}`}>← 가족방으로</Link>
+        <Link href={`/f/${token}/questions`}>← 질문 목록</Link>
       </p>
     </>
   );

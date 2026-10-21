@@ -1,11 +1,9 @@
 import { Icon } from "@/components/Icon";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { headers } from "next/headers";
-import { findChild } from "@/lib/db";
-import { familyNow, processFamily } from "@/lib/checkin";
+import { loadFamilyPage } from "@/lib/family-page";
 import { josa, kstDate, kstLabel, timeAgo, untilDeadline, weekStart } from "@/lib/format";
-import { CallCheckForm, MailboxForm } from "@/components/Forms";
+import { CallCheckForm } from "@/components/Forms";
 import { ResponseCalendar } from "@/components/ResponseCalendar";
 import { InviteCard } from "@/components/InviteCard";
 
@@ -23,12 +21,7 @@ export default async function FamilyPage({
 }) {
   const { token } = await params;
   const { welcome } = await searchParams;
-  const first = await findChild(token);
-  if (!first) notFound();
-  // 안부 문자 흐름(재문자·확인콜·알림)과 마감된 질문을 먼저 처리한다
-  const processed = await processFamily(first.family.id, first.db);
-  const { db, child, family, parent, siblings } = (await findChild(token, processed))!;
-  const now = familyNow(family);
+  const { db, child, family, parent, siblings, now } = await loadFamilyPage(token);
   const today = kstDate(now);
   const checkins = db.checkins.filter((c) => c.familyId === family.id);
   const todayCheckin = checkins.find((c) => c.date === today);
@@ -41,19 +34,17 @@ export default async function FamilyPage({
   const report = db.reports.filter((r) => r.familyId === family.id).at(-1);
   const questions = db.questions.filter((q) => q.familyId === family.id).reverse();
   const open = questions.filter((q) => q.status === "open");
-  const closed = questions.filter((q) => q.status === "closed").slice(0, 3);
 
   const since = weekStart(now);
   const siblingIds = new Set(siblings.map((s) => s.id));
   const weekChecks = db.checks.filter((c) => siblingIds.has(c.childId) && new Date(c.createdAt) >= since);
-  const mailbox = db.mailbox.filter((m) => siblingIds.has(m.childId)).reverse();
-  const unplayed = mailbox.filter((m) => !m.played).length;
-  const nameOf = (id: string) => siblings.find((s) => s.id === id)?.role ?? "";
 
   return (
     <>
       <div className="hello">
-        <small>{family.name}</small>
+        <small>
+          {Number(today.slice(5, 7))}월 {Number(today.slice(8, 10))}일 ({["일", "월", "화", "수", "목", "금", "토"][new Date(`${today}T12:00:00+09:00`).getUTCDay()]})
+        </small>
         <h1>
           {child.name}님, {parent.name} 이번 주 소식이에요
         </h1>
@@ -91,31 +82,20 @@ export default async function FamilyPage({
           </span>
         </h2>
         <ResponseCalendar checkins={checkins} today={today} />
-        <Link className="btn secondary" href={`/f/${token}/sim`} style={{ marginTop: 12 }}>
-          <Icon name="smartphone" /> {parent.name} 폰 시뮬레이터 열기
-        </Link>
       </section>
 
-      {open.map((q) => {
-        const answered = new Set(db.replies.filter((r) => r.questionId === q.id).map((r) => r.childId));
-        const mineDone = answered.has(child.id);
-        return (
-          <section className="card" key={q.id}>
-            <h2>
-              <Icon name="mail" /> {josa(parent.name, "이", "가")} 물어보셨어요
-              <span className="tag">{untilDeadline(q.deadline, now)}</span>
-            </h2>
-            <div className="question">“{q.text}”</div>
-            <p className="muted">
-              {siblings.length}명 중 {answered.size}명 답함
-              {!mineDone && " · 아직 내 답이 없어요"}
-            </p>
-            <Link className={`btn ${mineDone ? "secondary" : ""}`} href={`/f/${token}/q/${q.id}`}>
-              {mineDone ? "답장 보기·고치기" : "답장하기"}
-            </Link>
-          </section>
-        );
-      })}
+      {open.length > 0 && (
+        <Link href={`/f/${token}/questions`} className="card link-card">
+          <h2>
+            <Icon name="forum" /> {josa(parent.name, "이", "가")} 물어보셨어요
+            <span className="tag">{open.length}개</span>
+          </h2>
+          <div className="question">“{open[0].text}”</div>
+          <span className="muted">
+            {untilDeadline(open[0].deadline, now)} · 질문 탭에서 답장하기 <Icon name="chevron_right" />
+          </span>
+        </Link>
+      )}
 
       {report && (
         <section className="card">
@@ -171,53 +151,6 @@ export default async function FamilyPage({
         </ul>
         <CallCheckForm token={token} motherName={parent.name} />
       </section>
-
-      <section className="card">
-        <h2>
-          <Icon name="markunread_mailbox" /> {parent.name} 우체통
-          <span className="tag">{unplayed > 0 ? `안 들으신 소식 ${unplayed}개` : "비었어요"}</span>
-        </h2>
-        <p className="muted">
-          {josa(parent.name, "이", "가")} 대표번호로 전화하시면 1번 &lsquo;소식 듣기&rsquo;로 여기 남긴 목소리를 들으세요.
-          {unplayed === 0 && " 들을 거리가 있어야 먼저 전화하세요!"}
-        </p>
-        {mailbox.length > 0 && (
-          <ul className="plain" style={{ margin: "10px 0 14px" }}>
-            {mailbox.slice(0, 4).map((m) => (
-              <li key={m.id}>
-                <b>{nameOf(m.childId)}</b> <span className="muted">· {timeAgo(m.createdAt)}</span>{" "}
-                {m.played ? <span className="tag gray">들으심</span> : <span className="tag">대기</span>}
-                {m.text && <div>{m.text}</div>}
-                {m.audio && <audio src={`/api/audio/${m.audio}`} controls style={{ width: "100%", height: 36 }} />}
-              </li>
-            ))}
-          </ul>
-        )}
-        <MailboxForm token={token} />
-      </section>
-
-      {closed.length > 0 && (
-        <section className="card">
-          <h2><Icon name="task_alt" /> 지난 질문</h2>
-          <ul className="plain">
-            {closed.map((q) => (
-              <li key={q.id}>
-                <Link href={`/f/${token}/q/${q.id}`}>“{q.text}”</Link>
-                {q.summary && <div className="muted">→ {q.summary.sms}</div>}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      <div className="row" style={{ marginTop: 6 }}>
-        <Link className="btn secondary" href={`/f/${token}/news`}>
-          <Icon name="newspaper" /> 이달의 가족신문
-        </Link>
-        <Link className="btn secondary" href={`/f/${token}/settings`}>
-          <Icon name="settings" /> 내 설정
-        </Link>
-      </div>
 
       <p className="footer">가족 안부 허브 · 링크는 {child.name}님 전용이에요</p>
     </>

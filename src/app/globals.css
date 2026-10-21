@@ -45,6 +45,7 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 body {
+  font-family: var(--font-pretendard), -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
   background: var(--bg);
   color: var(--ink);
   font-size: 16px;
@@ -80,16 +81,55 @@ a { color: inherit; }
 /* 상단 앱 바 */
 .appbar {
   position: sticky; top: 0; z-index: 10;
-  height: 56px; display: flex; align-items: center;
-  padding: 0 16px; background: color-mix(in srgb, var(--bg) 88%, transparent);
+  padding: env(safe-area-inset-top) 16px 0;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: saturate(1.4) blur(10px);
 }
-.brand {
-  max-width: 520px; width: 100%; margin: 0 auto;
-  display: flex; align-items: center; gap: 8px;
-  font-weight: 700; font-size: 17px; text-decoration: none; color: var(--ink);
-}
+.appbar.admin { background: color-mix(in srgb, var(--card-2) 92%, transparent); }
+.appbar-inner { max-width: 520px; height: 56px; margin: 0 auto; display: flex; align-items: center; gap: 8px; }
+.brand { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; text-decoration: none; color: var(--ink); }
 .brand-mark { color: var(--accent); font-size: 26px; }
+.brand-text { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+.brand-text small { font-size: 12px; font-weight: 500; color: var(--sub); }
+.appbar-action { color: var(--accent); font-weight: 600; font-size: 14px; text-decoration: none; padding: 8px 12px; border-radius: 100px; }
+.appbar-action:hover { background: var(--accent-soft); }
+.icon-btn { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: var(--sub); text-decoration: none; }
+.icon-btn:hover { background: var(--card-2); }
+.icon-btn .ms { font-size: 24px; }
+
+/* 하단 탭 (Material 3 Navigation bar) */
+.bottomnav {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  display: flex; justify-content: center;
+  padding: 0 4px env(safe-area-inset-bottom);
+  background: var(--card-2);
+  box-shadow: 0 -1px 0 color-mix(in srgb, var(--line) 50%, transparent);
+}
+.bottomnav .tab {
+  flex: 1; max-width: 104px; height: 72px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  text-decoration: none; color: var(--sub); font-size: 12px; font-weight: 500;
+}
+.bottomnav .indicator { position: relative; width: 56px; height: 30px; border-radius: 100px; display: grid; place-items: center; transition: background-color 0.2s; }
+.bottomnav .indicator .ms { font-size: 24px; }
+.bottomnav .tab.active { color: var(--ink); font-weight: 700; }
+.bottomnav .tab.active .indicator { background: var(--accent-soft); color: var(--on-accent-soft); }
+.bottomnav .badge {
+  position: absolute; top: -2px; right: 8px; min-width: 16px; height: 16px; padding: 0 4px;
+  border-radius: 8px; background: var(--err); color: #fff; font-size: 10px; font-weight: 700;
+  display: grid; place-items: center; line-height: 1;
+}
+.wrap.has-nav { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+
+/* 목록·빈 상태 */
+.link-card { display: block; text-decoration: none; color: inherit; }
+.link-card:hover { box-shadow: var(--shadow-2); }
+.list-link { display: flex; gap: 10px; align-items: flex-start; text-decoration: none; color: inherit; }
+.block { display: block; }
+.empty { text-align: center; color: var(--sub); }
+.empty > .ms { font-size: 40px; color: var(--accent); }
+.empty p { margin: 8px 0 0; }
+.empty a { color: var(--accent); }
 
 .wrap { max-width: 520px; margin: 0 auto; padding: 8px 16px 72px; }
 
@@ -329,3 +369,10 @@ details.card summary::-webkit-details-marker { display: none; }
 .summary-title { display: inline-flex; align-items: center; gap: 8px; }
 .summary-title .ms { color: var(--accent); }
 .phone-screen .muted { color: #5b6657; }
+
+/* 랜딩 진입점 */
+.entry-grid { display: grid; gap: 8px; margin-bottom: 12px; }
+.entry { display: flex; align-items: center; gap: 14px; margin: 0; padding: 16px 18px; }
+.entry > .ms { color: var(--sub); }
+.entry-icon { width: 48px; height: 48px; border-radius: 16px; display: grid; place-items: center; background: var(--accent-soft); color: var(--on-accent-soft); flex-shrink: 0; }
+.entry-icon .ms { font-size: 26px; }

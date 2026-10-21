@@ -39,9 +39,6 @@ export default async function News({
   return (
     <>
       <div className="row no-print" style={{ marginBottom: 14 }}>
-        <Link className="btn small secondary" href={`/f/${token}`}>
-          ← 가족방
-        </Link>
         <Link className="btn small secondary" href={`/f/${token}/news?month=${prevYm}`}>
           지난달
         </Link>

@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { promises as fs } from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
@@ -114,6 +115,9 @@ function stripUndefined<T>(v: T): T {
 export async function readDB(): Promise<DB> {
   return firestoreEnabled() ? readFirestore() : readFile();
 }
+
+// 레이아웃(상단 바·탭 배지)처럼 한 요청 안에서 여러 번 읽어도 되는 곳용 — 요청당 1번만 읽는다
+export const readDBCached = cache(readDB);
 
 let queue: Promise<unknown> = Promise.resolve();
 
