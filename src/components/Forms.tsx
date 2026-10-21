@@ -41,7 +41,7 @@ export function ReplyForm({ token, questionId, options }: { token: string; quest
       <textarea name="text" placeholder="덧붙일 말 (예: 토요일 오전에 갈게요, 애들은 일요일에 와요)" />
       <VoiceRecorder label="엄마께 목소리로 답하기" />
       <label className="check">
-        <input type="checkbox" name="hide" /> 메모는 엄마께는 빼줘 (가족들만 봐요)
+        <input type="checkbox" name="hide" /> 메모는 엄마께는 빼줘 (함께하는 사람들만 봐요)
       </label>
       <Result state={state} />
       <button className="btn" disabled={pending}>

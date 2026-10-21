@@ -85,7 +85,7 @@ export default async function ArsScript({ params }: { params: Promise<{ id: stri
 
       <section className="card script">
         <h2>2️⃣ 물어보기</h2>
-        <div className="say">혹시 자녀분들께 물어보고 싶으신 거 있으세요? 제가 전해드릴게요.</div>
+        <div className="say">혹시 가족방 사람들한테 물어보고 싶으신 거 있으세요? 제가 전해드릴게요.</div>
         {open.length > 0 && (
           <p className="act">
             아직 답을 모으는 중: {open.map((q) => `“${q.text}”`).join(", ")} — &ldquo;지난번 물어보신 건 아직 답을 모으고 있어요&rdquo;
@@ -100,7 +100,7 @@ export default async function ArsScript({ params }: { params: Promise<{ id: stri
             <option value="6">6시간 뒤 마감</option>
             <option value="24">내일 마감</option>
           </select>
-          <button className="btn secondary">가족들에게 보내기</button>
+          <button className="btn secondary">함께하는 사람들에게 보내기</button>
         </form>
         <div className="say">네, 꼭 전할게요. 답이 모이면 제가 다시 전화드릴게요.</div>
       </section>
@@ -110,7 +110,7 @@ export default async function ArsScript({ params }: { params: Promise<{ id: stri
         {checks.map((c) => (
           <div key={c.id}>
             <div className="say">{josa(roleOf(c.childId), "이랑", "랑")} 통화하셨다면서요? 무슨 얘기 하셨어요?</div>
-            {c.memo && <p className="act">자녀 메모: {c.memo}</p>}
+            {c.memo && <p className="act">남긴 메모: {c.memo}</p>}
           </div>
         ))}
         {memories.map((m) => (

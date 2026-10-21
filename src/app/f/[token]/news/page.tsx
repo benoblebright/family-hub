@@ -80,7 +80,7 @@ export default async function News({
 
         {letters.length > 0 && (
           <>
-            <h2>자녀들이 보낸 편지</h2>
+            <h2>가족방에서 보낸 편지</h2>
             {letters.map((x) => (
               <p key={x.id}>
                 <span className="from">{roleOf(x.childId)}:</span> {x.text}

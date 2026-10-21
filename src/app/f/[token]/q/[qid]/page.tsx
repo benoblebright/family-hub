@@ -43,7 +43,7 @@ export default async function ReplyPage({ params }: { params: Promise<{ token: s
       </section>
 
       <section className="card">
-        <h2>가족들 답장</h2>
+        <h2>모두의 답장</h2>
         <ul className="plain">
           {siblings.map((s) => {
             const r = replies.filter((x) => x.childId === s.id).at(-1);

@@ -71,7 +71,7 @@ export default async function NewFamily({ searchParams }: { searchParams: Promis
           {Array.from({ length: 5 }, (_, i) => (
             <fieldset key={i} className="child-row">
               <div className="row">
-                <input type="text" name="childName" placeholder={i === 0 ? "이름 (필수)" : `자녀 ${i + 1} 이름`} required={i === 0} className="grow" />
+                <input type="text" name="childName" placeholder={i === 0 ? "이름 (필수)" : `${i + 1}번째 사람 이름`} required={i === 0} className="grow" />
                 <input type="text" name="childRole" placeholder="호칭" defaultValue={ROLES[i] ?? ""} style={{ width: 96 }} />
               </div>
               <div className="row">
@@ -83,7 +83,7 @@ export default async function NewFamily({ searchParams }: { searchParams: Promis
               </div>
             </fieldset>
           ))}
-          <p className="muted">빈 줄은 무시해요. 등록하면 자녀마다 전용 링크가 만들어져요.</p>
+          <p className="muted">빈 줄은 무시해요. 등록하면 한 명마다 전용 링크가 만들어져요.</p>
         </section>
 
         <button className="btn">등록하고 링크 만들기</button>

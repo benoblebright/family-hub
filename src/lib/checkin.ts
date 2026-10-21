@@ -72,7 +72,7 @@ export function tick(db: DB, familyId: string, now: number) {
       const t = new Date(c.callAt).getTime() + RULES.alertAfterMin * MIN;
       c.callResult = "missed";
       c.alertedAt = iso(t);
-      pushEvent(db, familyId, t, "alert", `⚠️ ${mom}께서 오늘 안부 문자와 확인콜에 모두 답이 없으세요. 가족 중 한 분이 전화해 주세요.`);
+      pushEvent(db, familyId, t, "alert", `⚠️ ${mom}께서 오늘 안부 문자와 확인콜에 모두 답이 없으세요. 누구든 한 분이 전화해 주세요.`);
     }
   }
 
@@ -104,15 +104,15 @@ export function momSms(db: DB, familyId: string, text: string, now: number): { q
     }
     if (n === 3) {
       c.alertedAt = iso(now);
-      pushEvent(db, familyId, now, "sms_out", "[가족방] 그러셨구나. 자녀들에게 전화드리라고 할게요.");
+      pushEvent(db, familyId, now, "sms_out", "[가족방] 그러셨구나. 가족방 사람들에게 전화드리라고 할게요.");
       pushEvent(db, familyId, now, "alert", `💛 ${mom}께서 오늘 '별로'라고 하셨어요. 전화 한 통 어떠세요?`);
     } else {
-      pushEvent(db, familyId, now, "sms_out", `[가족방] 고마워요! ${n === 1 ? "좋은 하루 보내세요." : "가족들에게 전할게요."}`);
+      pushEvent(db, familyId, now, "sms_out", `[가족방] 고마워요! ${n === 1 ? "좋은 하루 보내세요." : "가족방에 전할게요."}`);
     }
     return {};
   }
 
-  pushEvent(db, familyId, now, "sms_out", "[가족방] 자녀들에게 물어볼게요. 답이 모이면 문자로 알려드릴게요.");
+  pushEvent(db, familyId, now, "sms_out", "[가족방] 가족방 사람들에게 물어볼게요. 답이 모이면 문자로 알려드릴게요.");
   return { question: t };
 }
 
@@ -129,7 +129,7 @@ export function momCall(db: DB, familyId: string, answer: boolean, now: number) 
     c.callResult = "missed";
     c.alertedAt = iso(now);
     pushEvent(db, familyId, now, "call_in", "📞 확인콜 거절");
-    pushEvent(db, familyId, now, "alert", `⚠️ ${mom}께서 안부 문자와 확인콜에 답이 없으세요. 가족 중 한 분이 전화해 주세요.`);
+    pushEvent(db, familyId, now, "alert", `⚠️ ${mom}께서 안부 문자와 확인콜에 답이 없으세요. 누구든 한 분이 전화해 주세요.`);
   }
 }
 
@@ -202,7 +202,7 @@ export async function openMomQuestion(familyId: string, text: string, source: "c
       status: "open",
       createdAt: iso(now),
     });
-    pushEvent(db, familyId, now, "system", `💌 가족들에게 질문을 보냈어요: “${text}” (${hours}시간 뒤 마감)`);
+    pushEvent(db, familyId, now, "system", `💌 함께하는 사람들에게 질문을 보냈어요: “${text}” (${hours}시간 뒤 마감)`);
   });
 }
 

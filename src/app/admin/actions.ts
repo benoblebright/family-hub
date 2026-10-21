@@ -33,7 +33,7 @@ export async function login(form: FormData) {
 export async function createFamilyAdmin(form: FormData) {
   await requireAdmin();
   const input = parseFamilyForm(form);
-  if (input.children.length === 0) throw new Error("자녀를 한 명 이상 등록해 주세요.");
+  if (input.children.length === 0) throw new Error("함께할 사람을 한 명 이상 등록해 주세요.");
   const { familyId } = await createFamily(input);
   done();
   redirect(`/admin/f/${familyId}`);
@@ -123,7 +123,7 @@ export async function addCall(form: FormData) {
     if (memory) db.memories.push({ id: newId(), familyId, text: memory, createdAt: call.at });
     if (story) db.stories.push({ id: newId(), familyId, topic: str(form.get("storyTopic")) || "회상", text: story, createdAt: call.at });
   });
-  // 통화 중 엄마가 남긴 질문은 바로 가족들에게
+  // 통화 중 엄마가 남긴 질문은 바로 함께하는 사람들에게
   if (momQuestion) {
     const fd = new FormData();
     fd.set("familyId", familyId);

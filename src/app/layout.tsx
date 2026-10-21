@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "가족 안부 허브",
-  description: "엄마가 먼저 묻는 가족방 — 가족들이 함께 쓰는 부모님 안부·소통 서비스",
+  description: "엄마가 먼저 묻는 가족방 — 함께하는 사람들이 함께 쓰는 부모님 안부·소통 서비스",
 };
 
 export const viewport: Viewport = {

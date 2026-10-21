@@ -23,7 +23,7 @@ export function InviteCard(props: { origin: string; me: Child; siblings: Child[]
   return (
     <details className="card" open={props.open}>
       <summary>
-        <b>{props.open ? "🎉 가족방이 만들어졌어요! 가족들을 초대하세요" : "👥 가족 초대 링크"}</b>
+        <b>{props.open ? "🎉 가족방이 만들어졌어요! 함께할 사람을 초대하세요" : "👥 초대 링크"}</b>
       </summary>
       <ul className="plain" style={{ marginTop: 10 }}>
         {others.map((s) => (

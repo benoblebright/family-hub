@@ -49,7 +49,7 @@ export default async function AdminHome() {
         </div>
         <div className="kpi">
           <b>{totalSiblingCalls}번</b>
-          <span>최근 4주 가족 통화 (핵심 지표)</span>
+          <span>최근 4주 엄마께 건 통화 (핵심 지표)</span>
         </div>
         <div className="kpi">
           <b>{db.leads.filter((l) => l.status === "new").length}명</b>
