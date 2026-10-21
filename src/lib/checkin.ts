@@ -8,7 +8,7 @@ import { classifyQuestion, summarizeReplies } from "./ai";
 export const RULES = {
   resendAfterMin: 120, // 2시간 안에 답이 없으면 재문자
   callAfterMin: 60, // 재문자 후 1시간 안에도 없으면 AI 확인콜
-  alertAfterMin: 30, // 확인콜을 30분 안에 안 받으면 형제 알림
+  alertAfterMin: 30, // 확인콜을 30분 안에 안 받으면 가족 알림
   smsMaxChars: 45, // 2G폰 단문 기준
 };
 
@@ -55,7 +55,7 @@ export function tick(db: DB, familyId: string, now: number) {
     pushEvent(db, familyId, send, "sms_out", `[가족방] ${mom}, 좋은 아침이에요. 오늘 기분은? 1좋아 2그냥 3별로`);
   }
 
-  // 2) 답이 없는 안부 문자: 재문자 → 확인콜 → 형제 알림
+  // 2) 답이 없는 안부 문자: 재문자 → 확인콜 → 가족 알림
   for (const c of db.checkins.filter((x) => x.familyId === familyId && !x.answer && !x.callResult)) {
     const sent = new Date(c.sentAt).getTime();
     if (!c.resentAt && now >= sent + RULES.resendAfterMin * MIN) {
@@ -72,7 +72,7 @@ export function tick(db: DB, familyId: string, now: number) {
       const t = new Date(c.callAt).getTime() + RULES.alertAfterMin * MIN;
       c.callResult = "missed";
       c.alertedAt = iso(t);
-      pushEvent(db, familyId, t, "alert", `⚠️ ${mom}께서 오늘 안부 문자와 확인콜에 모두 답이 없으세요. 형제 중 한 분이 전화해 주세요.`);
+      pushEvent(db, familyId, t, "alert", `⚠️ ${mom}께서 오늘 안부 문자와 확인콜에 모두 답이 없으세요. 가족 중 한 분이 전화해 주세요.`);
     }
   }
 
@@ -104,7 +104,7 @@ export function momSms(db: DB, familyId: string, text: string, now: number): { q
       pushEvent(db, familyId, now, "sms_out", "[가족방] 그러셨구나. 자녀들에게 전화드리라고 할게요.");
       pushEvent(db, familyId, now, "alert", `💛 ${mom}께서 오늘 '별로'라고 하셨어요. 전화 한 통 어떠세요?`);
     } else {
-      pushEvent(db, familyId, now, "sms_out", `[가족방] 고마워요! ${n === 1 ? "좋은 하루 보내세요." : "형제들에게 전할게요."}`);
+      pushEvent(db, familyId, now, "sms_out", `[가족방] 고마워요! ${n === 1 ? "좋은 하루 보내세요." : "가족들에게 전할게요."}`);
     }
     return {};
   }
@@ -126,11 +126,11 @@ export function momCall(db: DB, familyId: string, answer: boolean, now: number) 
     c.callResult = "missed";
     c.alertedAt = iso(now);
     pushEvent(db, familyId, now, "call_in", "📞 확인콜 거절");
-    pushEvent(db, familyId, now, "alert", `⚠️ ${mom}께서 안부 문자와 확인콜에 답이 없으세요. 형제 중 한 분이 전화해 주세요.`);
+    pushEvent(db, familyId, now, "alert", `⚠️ ${mom}께서 안부 문자와 확인콜에 답이 없으세요. 가족 중 한 분이 전화해 주세요.`);
   }
 }
 
-/** 형제 전원 답장 또는 마감 시각이 지난 질문 (R4-3) */
+/** 가족 전원 답장 또는 마감 시각이 지난 질문 (R4-3) */
 export function dueQuestions(db: DB, familyId: string, now: number) {
   const kids = db.children.filter((c) => c.familyId === familyId).map((c) => c.id);
   return db.questions.filter((q) => {
@@ -192,7 +192,7 @@ export async function openMomQuestion(familyId: string, text: string, source: "c
       status: "open",
       createdAt: iso(now),
     });
-    pushEvent(db, familyId, now, "system", `💌 형제들에게 질문을 보냈어요: “${text}” (${hours}시간 뒤 마감)`);
+    pushEvent(db, familyId, now, "system", `💌 가족들에게 질문을 보냈어요: “${text}” (${hours}시간 뒤 마감)`);
   });
 }
 

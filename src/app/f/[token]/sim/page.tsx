@@ -7,7 +7,7 @@ import { simCall, simForward, simReset, simSend } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-const KIND_LABEL = { sms_out: "문자 발송", sms_in: "엄마 문자", call_out: "확인콜", call_in: "통화", alert: "형제 알림", system: "시스템" } as const;
+const KIND_LABEL = { sms_out: "문자 발송", sms_in: "엄마 문자", call_out: "확인콜", call_in: "통화", alert: "가족 알림", system: "시스템" } as const;
 const DOW = ["일", "월", "화", "수", "목", "금", "토"];
 
 export default async function Simulator({ params }: { params: Promise<{ token: string }> }) {
@@ -93,7 +93,7 @@ export default async function Simulator({ params }: { params: Promise<{ token: s
                 </form>
               </div>
               <p className="muted" style={{ fontSize: 12 }}>
-                그냥 두면 {RULES.alertAfterMin}분 뒤 형제들에게 알림이 가요
+                그냥 두면 {RULES.alertAfterMin}분 뒤 가족들에게 알림이 가요
               </p>
             </div>
           ) : sms.length === 0 ? (
@@ -134,9 +134,9 @@ export default async function Simulator({ params }: { params: Promise<{ token: s
         <ol className="topics">
           <li>매일 {parent.checkinTime ?? "09:00"}에 안부 문자가 가요. 숫자 하나로 답하시면 끝.</li>
           <li>{RULES.resendAfterMin / 60}시간 안에 답이 없으면 재문자, 그 뒤 {RULES.callAfterMin}분 안에도 없으면 AI 확인콜.</li>
-          <li>확인콜을 안 받으시면 형제 모두에게 알림이 가요.</li>
-          <li>&lsquo;3 별로&rsquo;라고 하시면 형제들에게 &ldquo;전화 한 통 어떠세요&rdquo; 알림.</li>
-          <li>숫자가 아닌 글은 형제들에게 질문으로 가고, 답이 모이면 {RULES.smsMaxChars}자 이내 요약 문자가 와요.</li>
+          <li>확인콜을 안 받으시면 가족 모두에게 알림이 가요.</li>
+          <li>&lsquo;3 별로&rsquo;라고 하시면 가족들에게 &ldquo;전화 한 통 어떠세요&rdquo; 알림.</li>
+          <li>숫자가 아닌 글은 가족들에게 질문으로 가고, 답이 모이면 {RULES.smsMaxChars}자 이내 요약 문자가 와요.</li>
         </ol>
       </section>
 

@@ -10,7 +10,7 @@ function mark(c?: Checkin): [string, string, string] {
   if (c.answer === 2) return ["a2", "😐", "그냥"];
   if (c.answer === 3) return ["a3", "😟", "별로"];
   if (c.callResult === "answered") return ["a1", "📞", "확인콜로 확인"];
-  if (c.callResult === "missed") return ["miss", "✕", "무응답 → 형제 알림"];
+  if (c.callResult === "missed") return ["miss", "✕", "무응답 → 가족 알림"];
   return ["", "⏳", "답 기다리는 중"];
 }
 

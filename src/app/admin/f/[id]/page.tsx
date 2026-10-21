@@ -100,13 +100,13 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
         </div>
         <div className="kpi">
           <b>{kpi.siblingCalls}번</b>
-          <span>형제가 엄마께 통화</span>
+          <span>가족가 엄마께 통화</span>
         </div>
         <div className="kpi">
           <b>
             {kpi.momQuestions}개 · {pct(kpi.replyRate)}
           </b>
-          <span>엄마 질문 · 형제 답장률</span>
+          <span>엄마 질문 · 가족 답장률</span>
         </div>
       </div>
       <p className="muted" style={{ margin: "-6px 4px 14px" }}>
@@ -116,7 +116,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
 
       <section className="card">
         <h2>📞 통화 기록 남기기</h2>
-        <p className="muted">vox 연동 전까지 안부콜 결과를 여기에 적어요. 엄마 질문을 적으면 형제들에게 바로 질문이 열려요.</p>
+        <p className="muted">vox 연동 전까지 안부콜 결과를 여기에 적어요. 엄마 질문을 적으면 가족들에게 바로 질문이 열려요.</p>
         <form action={addCall} style={{ marginTop: 10 }}>
           <input type="hidden" name="familyId" value={id} />
           <div className="row">
@@ -150,7 +150,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
             ))}
           </div>
           <input type="text" name="memory" placeholder="기억 노트로 남길 사실 (예: 손주 운동회 10월 말)" />
-          <input type="text" name="momQuestion" placeholder="엄마가 형제들에게 물어보신 것 (있으면)" />
+          <input type="text" name="momQuestion" placeholder="엄마가 가족들에게 물어보신 것 (있으면)" />
           <div className="row">
             <select name="storyTopic" defaultValue={nextMemory.topic} style={{ width: 120 }}>
               {MEMORY_QUESTIONS.map((m) => (
@@ -205,7 +205,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
               <option value="24">내일 마감</option>
             </select>
           </div>
-          <button className="btn secondary">형제들에게 질문 열기</button>
+          <button className="btn secondary">가족들에게 질문 열기</button>
         </form>
         {questions.map((q) => {
           const replies = db.replies.filter((r) => r.questionId === q.id);
@@ -275,7 +275,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
             <input type="text" name="answered" defaultValue={draft.calls.answered} inputMode="numeric" className="grow" aria-label="받은 콜" />
             <input type="text" name="scheduled" defaultValue={draft.calls.scheduled} inputMode="numeric" className="grow" aria-label="예정 콜" />
           </div>
-          <button className="btn">{thisWeek ? "고쳐서 다시 발행" : "형제 가족방에 발행"}</button>
+          <button className="btn">{thisWeek ? "고쳐서 다시 발행" : "가족방에 발행"}</button>
         </form>
       </section>
 
@@ -330,7 +330,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
           📮 우체통 <span className="tag">{mailbox.length}개 대기</span>
         </h2>
         {mailbox.length === 0 ? (
-          <p className="muted">비었어요. 형제들에게 &ldquo;엄마 우체통이 비었어요&rdquo; 알림을 보낼 때예요.</p>
+          <p className="muted">비었어요. 가족들에게 &ldquo;엄마 우체통이 비었어요&rdquo; 알림을 보낼 때예요.</p>
         ) : (
           <Link className="btn secondary" href={`/admin/f/${id}/ars`}>
             ARS 대본에서 들려드리기
@@ -360,7 +360,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
       </section>
 
       <section className="card">
-        <h2>🔗 형제 링크 · 알림톡 문구</h2>
+        <h2>🔗 가족 링크 · 알림톡 문구</h2>
         <p className="muted">알림톡 연동 전에는 아래 문구를 카톡으로 직접 보내세요.</p>
         {children.map((c) => (
           <div key={c.id} style={{ marginTop: 12 }}>

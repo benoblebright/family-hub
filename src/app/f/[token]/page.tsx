@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 const MOOD_TAG = { 좋음: "ok", 보통: "gray", "조금 걱정": "warn" } as const;
 
-// 가족 대시보드 — 주간 알림톡 링크로 들어오는 형제 공동 공간
+// 가족 대시보드 — 주간 알림톡 링크로 들어오는 가족 공동 공간
 export default async function FamilyPage({
   params,
   searchParams,

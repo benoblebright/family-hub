@@ -123,7 +123,7 @@ export async function addCall(form: FormData) {
     if (memory) db.memories.push({ id: newId(), familyId, text: memory, createdAt: call.at });
     if (story) db.stories.push({ id: newId(), familyId, topic: str(form.get("storyTopic")) || "회상", text: story, createdAt: call.at });
   });
-  // 통화 중 엄마가 남긴 질문은 바로 형제들에게
+  // 통화 중 엄마가 남긴 질문은 바로 가족들에게
   if (momQuestion) {
     const fd = new FormData();
     fd.set("familyId", familyId);

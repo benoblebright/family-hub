@@ -3,12 +3,12 @@
 import { useState } from "react";
 import type { Child } from "@/lib/types";
 
-// 형제 초대 링크 (R2-2) — 알림톡 연동 전에는 카톡으로 직접 보낸다
+// 가족 초대 링크 (R2-2) — 알림톡 연동 전에는 카톡으로 직접 보낸다
 export function InviteCard(props: { origin: string; me: Child; siblings: Child[]; familyName: string; motherName: string; open: boolean }) {
   const [copied, setCopied] = useState<string>();
   const others = props.siblings.filter((s) => s.id !== props.me.id);
   const message = (s: Child) =>
-    `[가족 안부 허브] ${s.name}님, ${props.me.name}님이 '${props.familyName}'에 초대했어요.\n${props.motherName} 아침 안부와 형제들 소식을 같이 봐요.\n\n▶ ${props.origin}/f/${s.token}`;
+    `[가족 안부 허브] ${s.name}님, ${props.me.name}님이 '${props.familyName}'에 초대했어요.\n${props.motherName} 아침 안부와 가족들 소식을 같이 봐요.\n\n▶ ${props.origin}/f/${s.token}`;
 
   async function copy(s: Child) {
     try {
@@ -23,7 +23,7 @@ export function InviteCard(props: { origin: string; me: Child; siblings: Child[]
   return (
     <details className="card" open={props.open}>
       <summary>
-        <b>{props.open ? "🎉 가족방이 만들어졌어요! 형제들을 초대하세요" : "👥 형제 초대 링크"}</b>
+        <b>{props.open ? "🎉 가족방이 만들어졌어요! 가족들을 초대하세요" : "👥 가족 초대 링크"}</b>
       </summary>
       <ul className="plain" style={{ marginTop: 10 }}>
         {others.map((s) => (

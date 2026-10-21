@@ -18,7 +18,7 @@ export function LeadForm() {
       <input type="text" id="lead-phone" name="phone" required inputMode="tel" autoComplete="tel" placeholder="010-" />
       <div className="row">
         <div className="grow">
-          <label className="field" htmlFor="lead-siblings">형제 수 (본인 포함)</label>
+          <label className="field" htmlFor="lead-siblings">함께할 사람 수 (본인 포함)</label>
           <select id="lead-siblings" name="siblings" defaultValue="3">
             {[1, 2, 3, 4, 5].map((n) => (
               <option key={n} value={n}>

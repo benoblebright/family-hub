@@ -16,7 +16,7 @@ export function parseFamilyForm(form: FormData) {
   const roles = form.getAll("childRole").map(str);
   const phones = form.getAll("childPhone").map(str);
   const children = names
-    .map((name, i) => ({ name: name.slice(0, 20), role: (roles[i] || `자녀${i + 1}`).slice(0, 10), phone: phones[i] || undefined, i }))
+    .map((name, i) => ({ name: name.slice(0, 20), role: (roles[i] || name).slice(0, 10), phone: phones[i] || undefined, i }))
     .filter((c) => c.name);
   const time = str(form.get("checkinTime"));
   return {

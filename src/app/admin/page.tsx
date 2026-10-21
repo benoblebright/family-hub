@@ -49,7 +49,7 @@ export default async function AdminHome() {
         </div>
         <div className="kpi">
           <b>{totalSiblingCalls}번</b>
-          <span>최근 4주 형제 통화 (핵심 지표)</span>
+          <span>최근 4주 가족 통화 (핵심 지표)</span>
         </div>
         <div className="kpi">
           <b>{db.leads.filter((l) => l.status === "new").length}명</b>
@@ -90,7 +90,7 @@ export default async function AdminHome() {
                 <span className={`tag ${STATUS[f.status ?? "trial"][1]}`}>{STATUS[f.status ?? "trial"][0]}</span>
               </div>
               <div className="muted">
-                {planName(f.plan)} · {parent?.callTimes ?? "콜 시간 미정"} · 응답률 {pct(kpi.answerRate)} · 평균 {kpi.avgMinutes ?? "–"}분 · 형제
+                {planName(f.plan)} · {parent?.callTimes ?? "콜 시간 미정"} · 응답률 {pct(kpi.answerRate)} · 평균 {kpi.avgMinutes ?? "–"}분 · 가족
                 통화 {kpi.siblingCalls}번 · 답장률 {pct(kpi.replyRate)}
                 {open > 0 && ` · 열린 질문 ${open}`}
                 {!parent?.consent?.recording && " · ⚠️ 녹음 동의 전"}
@@ -121,7 +121,7 @@ export default async function AdminHome() {
                 <span className={`tag ${l.status === "onboarded" ? "ok" : l.status === "dropped" ? "gray" : ""}`}>{LEAD[l.status]}</span>
               </div>
               <div className="muted">
-                {timeAgo(l.createdAt)} · 형제 {l.siblings}명 · 부모님 {PHONE[l.parentPhone]} · {planName(l.plan)}
+                {timeAgo(l.createdAt)} · 가족 {l.siblings}명 · 부모님 {PHONE[l.parentPhone]} · {planName(l.plan)}
                 {l.memo && ` · ${l.memo}`}
               </div>
               {l.status !== "onboarded" && (

@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 const ROLES = ["큰아들", "딸", "막내"];
 
-// 신규 가족 온보딩 — 부모님 정보·안부콜 시간·형제 목록을 받고 자녀별 링크를 발급한다
+// 신규 가족 온보딩 — 부모님 정보·안부콜 시간·가족 목록을 받고 자녀별 링크를 발급한다
 export default async function NewFamily({ searchParams }: { searchParams: Promise<{ lead?: string }> }) {
   await requireAdminPage();
   const { lead: leadId } = await searchParams;
@@ -67,7 +67,7 @@ export default async function NewFamily({ searchParams }: { searchParams: Promis
         </section>
 
         <section className="card">
-          <h2>형제 (알림톡 받을 사람)</h2>
+          <h2>가족 (알림톡 받을 사람)</h2>
           {Array.from({ length: 5 }, (_, i) => (
             <fieldset key={i} className="child-row">
               <div className="row">

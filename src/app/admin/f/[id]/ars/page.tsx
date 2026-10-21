@@ -100,7 +100,7 @@ export default async function ArsScript({ params }: { params: Promise<{ id: stri
             <option value="6">6시간 뒤 마감</option>
             <option value="24">내일 마감</option>
           </select>
-          <button className="btn secondary">형제들에게 보내기</button>
+          <button className="btn secondary">가족들에게 보내기</button>
         </form>
         <div className="say">네, 꼭 전할게요. 답이 모이면 제가 다시 전화드릴게요.</div>
       </section>

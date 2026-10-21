@@ -73,7 +73,7 @@ export async function submitReply(_: FormState, form: FormData): Promise<FormSta
   });
   if (result) return { ok: false, message: result };
 
-  // 형제 전원이 답했으면 바로 마감·요약 (R4-3)
+  // 가족 전원이 답했으면 바로 마감·요약 (R4-3)
   await processFamily(found.family.id);
   revalidatePath(`/f/${token}`, "layout");
   return {

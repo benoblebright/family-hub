@@ -88,7 +88,7 @@ export interface WeeklyReport {
   calls: { answered: number; scheduled: number };
 }
 
-// 매일 아침 안부 문자 한 건의 흐름: 발송 → (2시간 무응답) 재문자 → (1시간 무응답) 확인콜 → (30분 무응답) 형제 알림
+// 매일 아침 안부 문자 한 건의 흐름: 발송 → (2시간 무응답) 재문자 → (1시간 무응답) 확인콜 → (30분 무응답) 가족 알림
 export interface Checkin {
   id: string;
   familyId: string;
@@ -102,7 +102,7 @@ export interface Checkin {
   alertedAt?: string;
 }
 
-// 시뮬레이터 이벤트 로그 (문자·전화·형제 알림)
+// 시뮬레이터 이벤트 로그 (문자·전화·가족 알림)
 export interface SimEvent {
   id: string;
   familyId: string;

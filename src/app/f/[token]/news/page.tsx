@@ -6,7 +6,7 @@ import { PrintButton } from "@/components/PrintButton";
 
 export const dynamic = "force-dynamic";
 
-// 월간 종이 가족신문 — 통화 속 엄마 이야기 + 형제 소식으로 지면을 채운다 (Famileo 모델)
+// 월간 종이 가족신문 — 통화 속 엄마 이야기 + 가족 소식으로 지면을 채운다 (Famileo 모델)
 export default async function News({
   params,
   searchParams,

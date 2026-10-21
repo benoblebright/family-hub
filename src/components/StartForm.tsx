@@ -5,9 +5,9 @@ import { startFamily, type FormState } from "@/app/actions";
 
 const initial: FormState = { ok: false, message: "" };
 const SIBLINGS = [
-  { role: "딸", placeholder: "형제 이름 (선택)" },
-  { role: "막내", placeholder: "형제 이름 (선택)" },
-  { role: "", placeholder: "형제 이름 (선택)" },
+  { role: "", placeholder: "이름 (선택)" },
+  { role: "", placeholder: "이름 (선택)" },
+  { role: "", placeholder: "이름 (선택)" },
 ];
 
 export function StartForm() {
@@ -40,18 +40,18 @@ export function StartForm() {
         <h2>2. 나</h2>
         <div className="row">
           <input type="text" name="childName" placeholder="내 이름" required maxLength={20} className="grow" aria-label="내 이름" />
-          <input type="text" name="childRole" defaultValue="큰아들" maxLength={10} style={{ width: 96 }} aria-label="내 호칭" />
+          <input type="text" name="childRole" defaultValue="큰아들" placeholder="호칭" maxLength={10} style={{ width: 96 }} aria-label="내 호칭" />
         </div>
         <input type="hidden" name="childPhone" value="" />
       </section>
 
       <section className="card">
-        <h2>3. 함께할 형제</h2>
-        <p className="muted" style={{ marginBottom: 10 }}>만들고 나면 형제마다 초대 링크가 생겨요.</p>
+        <h2>3. 함께할 사람</h2>
+        <p className="muted" style={{ marginBottom: 10 }}>형제·가족·친구 누구나 좋아요. 만들고 나면 한 명마다 초대 링크가 생겨요.</p>
         {SIBLINGS.map((s, i) => (
           <div className="row" key={i}>
-            <input type="text" name="childName" placeholder={s.placeholder} maxLength={20} className="grow" aria-label={`형제 ${i + 1} 이름`} />
-            <input type="text" name="childRole" defaultValue={s.role} placeholder="호칭" maxLength={10} style={{ width: 96 }} aria-label={`형제 ${i + 1} 호칭`} />
+            <input type="text" name="childName" placeholder={s.placeholder} maxLength={20} className="grow" aria-label={`가족 ${i + 1} 이름`} />
+            <input type="text" name="childRole" defaultValue={s.role} placeholder="호칭 (딸·이모·친구)" maxLength={10} style={{ width: 96 }} aria-label={`가족 ${i + 1} 호칭`} />
             <input type="hidden" name="childPhone" value="" />
           </div>
         ))}

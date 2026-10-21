@@ -29,7 +29,7 @@ export default async function Demo() {
       </section>
       <section className="card">
         <h2>엄마 폰 시뮬레이터</h2>
-        <p className="muted">아침 안부 문자 → 숫자 답장 / 무응답 → 재문자 → 확인콜 → 형제 알림을 시간 빨리감기로 재현해요.</p>
+        <p className="muted">아침 안부 문자 → 숫자 답장 / 무응답 → 재문자 → 확인콜 → 가족 알림을 시간 빨리감기로 재현해요.</p>
         <Link className="btn" href="/f/minsu-demo/sim" style={{ marginTop: 10 }}>
           📱 시뮬레이터 열기
         </Link>
