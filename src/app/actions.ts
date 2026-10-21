@@ -54,6 +54,7 @@ export async function submitReply(_: FormState, form: FormData): Promise<FormSta
   if (!choice && !text && !audioFile) return { ok: false, message: "버튼을 누르거나, 글이나 목소리로 답해 주세요." };
 
   const audio = await saveAudio(audioFile);
+  if (audioFile && !audio && !choice && !text) return { ok: false, message: "음성을 저장하지 못했어요. 버튼이나 글로 답해 주세요." };
   const result = await updateDB((db) => {
     const q = db.questions.find((x) => x.id === questionId && x.familyId === found.family.id);
     if (!q) return "없는 질문이에요.";
@@ -75,7 +76,10 @@ export async function submitReply(_: FormState, form: FormData): Promise<FormSta
   // 형제 전원이 답했으면 바로 마감·요약 (R4-3)
   await processFamily(found.family.id);
   revalidatePath(`/f/${token}`, "layout");
-  return { ok: true, message: "답장을 보냈어요. 마감되면 AI가 모아서 엄마께 전해드려요." };
+  return {
+    ok: true,
+    message: audioFile && !audio ? "글 답장은 보냈어요. 음성은 저장하지 못했어요." : "답장을 보냈어요. 마감되면 AI가 모아서 엄마께 전해드려요.",
+  };
 }
 
 // "엄마랑 통화했어요" — 다음 AI 안부콜이 이어받는 핵심 KPI
@@ -103,6 +107,7 @@ export async function submitMailbox(_: FormState, form: FormData): Promise<FormS
   if (!text && !audioFile) return { ok: false, message: "목소리를 녹음하거나 글을 남겨 주세요." };
 
   const audio = await saveAudio(audioFile);
+  if (audioFile && !audio && !text) return { ok: false, message: "음성을 저장하지 못했어요. 글로 남겨 주세요." };
   await updateDB((db) => {
     db.mailbox.push({ id: newId(), childId: found.child.id, text, audio, played: false, createdAt: new Date().toISOString() });
   });

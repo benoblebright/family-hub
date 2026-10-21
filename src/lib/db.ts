@@ -145,13 +145,19 @@ export async function saveAudio(file: File | null): Promise<string | undefined> 
   const ext = file.type.includes("mp4") ? "m4a" : file.type.includes("ogg") ? "ogg" : "webm";
   const name = `${newId()}.${ext}`;
   const buf = Buffer.from(await file.arrayBuffer());
-  if (firestoreEnabled()) {
-    await getBucket().file(`audio/${name}`).save(buf, { contentType: AUDIO_TYPES[ext], resumable: false });
-  } else {
-    await fs.mkdir(AUDIO_DIR, { recursive: true });
-    await fs.writeFile(path.join(AUDIO_DIR, name), buf);
+  // 음성 저장이 실패해도(예: Storage 버킷 미생성) 글 답장은 살린다 — 호출 쪽에서 undefined를 확인
+  try {
+    if (firestoreEnabled()) {
+      await getBucket().file(`audio/${name}`).save(buf, { contentType: AUDIO_TYPES[ext], resumable: false });
+    } else {
+      await fs.mkdir(AUDIO_DIR, { recursive: true });
+      await fs.writeFile(path.join(AUDIO_DIR, name), buf);
+    }
+    return name;
+  } catch (err) {
+    console.error("음성 저장 실패:", err instanceof Error ? err.message : err);
+    return undefined;
   }
-  return name;
 }
 
 export async function loadAudio(name: string): Promise<{ buf: Buffer; type: string } | null> {

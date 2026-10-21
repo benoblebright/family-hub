@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { findChild } from "@/lib/db";
 import { josa, timeAgo, untilDeadline } from "@/lib/format";
 import { ReplyForm } from "@/components/Forms";
+import { familyNow } from "@/lib/checkin";
 
 export const dynamic = "force-dynamic";
 
@@ -30,13 +31,13 @@ export default async function ReplyPage({ params }: { params: Promise<{ token: s
       <section className="card">
         <div className="question">
           <span className="from">
-            {josa(parent.name, "이", "가")} {SOURCE[q.source]} 남기셨어요 · {timeAgo(q.createdAt)}
+            {josa(parent.name, "이", "가")} {SOURCE[q.source]} 남기셨어요 · {timeAgo(q.createdAt, familyNow(found.family))}
           </span>
           “{q.text}”
         </div>
         <p className="muted">
           {q.status === "open"
-            ? `${untilDeadline(q.deadline)} · 답이 모이면 AI가 정리해서 ${parent.name}께 전화와 문자로 전해드려요.`
+            ? `${untilDeadline(q.deadline, familyNow(found.family))} · 답이 모이면 AI가 정리해서 ${parent.name}께 전화와 문자로 전해드려요.`
             : `마감되어 ${parent.name}께 전달했어요.`}
         </p>
       </section>
