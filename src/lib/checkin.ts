@@ -83,6 +83,9 @@ export function tick(db: DB, familyId: string, now: number) {
 export function momSms(db: DB, familyId: string, text: string, now: number): { question?: string } {
   const mom = momName(db, familyId);
   const t = text.trim();
+  // 같은 문자를 15초 안에 또 보내면(두 번 누름) 무시한다
+  const last = db.events.filter((e) => e.familyId === familyId && e.kind === "sms_in").at(-1);
+  if (last && last.text === t && now - new Date(last.at).getTime() < 15_000) return {};
   pushEvent(db, familyId, now, "sms_in", t);
   const n = /^[1-3１-３]$/.test(t) ? (Number(t.replace(/[１-３]/, (x) => String(x.charCodeAt(0) - 0xff10))) as 1 | 2 | 3) : null;
 
@@ -161,17 +164,24 @@ export async function closeQuestionWithSummary(questionId: string) {
 }
 
 /** 페이지·액션 진입 시 호출: 시간 흐름 처리 + 마감된 질문 요약 */
-export async function processFamily(familyId: string) {
-  const now = await updateDB((db) => {
-    const f = db.families.find((x) => x.id === familyId);
-    if (!f) return null;
-    const t = familyNow(f);
-    tick(db, familyId, t);
-    return t;
-  });
-  if (now === null) return;
-  const db = await readDB();
-  for (const q of dueQuestions(db, familyId, now)) await closeQuestionWithSummary(q.id);
+// 읽기 1번으로 끝내는 게 기본: 일어날 일이 없으면 쓰지 않는다 (lastTick만 바뀌는 쓰기 생략)
+// tick은 같은 날짜·같은 단계를 두 번 처리하지 않으므로, lastTick을 저장하지 않아도 결과가 같다.
+export async function processFamily(familyId: string, base?: DB): Promise<DB> {
+  let db = base ?? (await readDB());
+  const f = db.families.find((x) => x.id === familyId);
+  if (!f) return db;
+  const now = familyNow(f);
+
+  const draft = structuredClone(db);
+  tick(draft, familyId, now);
+  const changed =
+    !f.lastTick || // 처음엔 기준 시각을 한 번 저장해야 이후 발송 시각을 셀 수 있다
+    draft.events.length !== db.events.length || JSON.stringify(draft.checkins) !== JSON.stringify(db.checkins);
+  if (changed) db = await updateDB((fresh) => (tick(fresh, familyId, now), fresh));
+
+  const due = dueQuestions(db, familyId, now);
+  for (const q of due) await closeQuestionWithSummary(q.id);
+  return due.length ? await readDB() : db;
 }
 
 /** 엄마 질문 열기 — 가족 시계 기준으로 마감 시각을 잡는다 */

@@ -173,8 +173,8 @@ export async function loadAudio(name: string): Promise<{ buf: Buffer; type: stri
   }
 }
 
-export async function findChild(token: string) {
-  const db = await readDB();
+export async function findChild(token: string, base?: DB) {
+  const db = base ?? (await readDB());
   const child = db.children.find((c) => c.token === token);
   if (!child) return null;
   const family = db.families.find((f) => f.id === child.familyId)!;

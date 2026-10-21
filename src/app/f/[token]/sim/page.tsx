@@ -14,9 +14,9 @@ export default async function Simulator({ params }: { params: Promise<{ token: s
   const { token } = await params;
   const first = await findChild(token);
   if (!first) notFound();
-  await processFamily(first.family.id);
+  const processed = await processFamily(first.family.id, first.db);
 
-  const { db, family, parent } = (await findChild(token))!;
+  const { db, family, parent } = (await findChild(token, processed))!;
   const now = familyNow(family);
   const offset = family.simOffsetMin ?? 0;
   const events = db.events.filter((e) => e.familyId === family.id && new Date(e.at).getTime() <= now);

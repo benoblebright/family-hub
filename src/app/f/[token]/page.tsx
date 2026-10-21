@@ -25,8 +25,8 @@ export default async function FamilyPage({
   const first = await findChild(token);
   if (!first) notFound();
   // 안부 문자 흐름(재문자·확인콜·알림)과 마감된 질문을 먼저 처리한다
-  await processFamily(first.family.id);
-  const { db, child, family, parent, siblings } = (await findChild(token))!;
+  const processed = await processFamily(first.family.id, first.db);
+  const { db, child, family, parent, siblings } = (await findChild(token, processed))!;
   const now = familyNow(family);
   const today = kstDate(now);
   const checkins = db.checkins.filter((c) => c.familyId === family.id);
