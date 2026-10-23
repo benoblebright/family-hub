@@ -20,7 +20,10 @@ export default async function Simulator({ params }: { params: Promise<{ token: s
   const { db, family, parent } = (await findChild(token, processed))!;
   const now = familyNow(family);
   const offset = family.simOffsetMin ?? 0;
-  const events = db.events.filter((e) => e.familyId === family.id && new Date(e.at).getTime() <= now);
+  // 여러 날을 한 번에 따라잡으면 저장 순서와 시간 순서가 달라질 수 있어 시각으로 정렬한다 (같은 시각은 저장 순서 유지)
+  const events = db.events
+    .filter((e) => e.familyId === family.id && new Date(e.at).getTime() <= now)
+    .sort((a, b) => a.at.localeCompare(b.at));
   const sms = events.filter((e) => e.kind === "sms_out" || e.kind === "sms_in").slice(-14);
   const ringing = db.checkins.find((c) => c.familyId === family.id && c.callAt && !c.callResult);
   const waiting = openCheckin(db, family.id, now);

@@ -27,7 +27,7 @@ export default async function FamilyPage({
   const todayCheckin = checkins.find((c) => c.date === today);
   const alerts = db.events
     .filter((e) => e.familyId === family.id && e.kind === "alert" && new Date(e.at).getTime() <= now && now - new Date(e.at).getTime() < 3 * 86400_000)
-    .reverse();
+    .sort((a, b) => b.at.localeCompare(a.at)); // 최신 알림 먼저
   const h = await headers();
   const origin = `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}`;
 
