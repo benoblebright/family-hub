@@ -27,7 +27,7 @@ export async function simSend(form: FormData) {
   const { question } = await updateDB((db) => {
     const f = db.families.find((x) => x.id === familyId)!;
     return momSms(db, familyId, text, familyNow(f));
-  });
+  }, familyId);
   if (question) await openMomQuestion(familyId, question, "sms");
   done(token);
 }
@@ -38,7 +38,7 @@ export async function simCall(form: FormData) {
   await updateDB((db) => {
     const f = db.families.find((x) => x.id === familyId)!;
     momCall(db, familyId, form.get("answer") === "yes", familyNow(f));
-  });
+  }, familyId);
   done(token);
 }
 
@@ -53,7 +53,7 @@ export async function simForward(form: FormData) {
     f.simOffsetMin = (f.simOffsetMin ?? 0) + step;
     pushEvent(db, familyId, now, "system", `⏩ 시간 ${step >= 60 ? `${Math.round(step / 6) / 10}시간` : `${step}분`} 빨리감기`);
     tick(db, familyId, familyNow(f));
-  });
+  }, familyId);
   await processFamily(familyId);
   done(token);
 }
@@ -75,6 +75,6 @@ export async function simReset(form: FormData) {
     f.simOffsetMin = 0;
     f.lastTick = new Date(now).toISOString();
     pushEvent(db, familyId, now, "system", "↺ 시계를 지금 시각으로 되돌렸어요");
-  });
+  }, familyId);
   done(token);
 }

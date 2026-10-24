@@ -10,6 +10,7 @@ export interface Family {
   createdAt?: string;
   simOffsetMin?: number; // 시뮬레이터 가상 시계 (빨리감기한 분)
   lastTick?: string; // 안부 문자 흐름을 마지막으로 처리한 가상 시각
+  demo?: boolean; // 평가자·체험자용으로 복제한 데모 가족방 (24시간 뒤 자동 삭제)
 }
 
 export type Plan = "basic" | "standard" | "premium";

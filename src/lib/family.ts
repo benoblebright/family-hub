@@ -73,9 +73,14 @@ export async function createFamily(input: ReturnType<typeof parseFamilyForm>): P
       });
     });
     db.events.push({ id: newId(), familyId, at: now, kind: "system", text: `가족방을 만들었어요. 매일 ${input.checkinTime}에 안부 문자가 가요.` });
-    const lead = db.leads.find((l) => l.id === input.leadId);
-    if (lead) lead.status = "onboarded";
-  });
+  }, familyId); // 새 가족 문서만 쓴다
+  // 운영자가 신청 건으로 등록했으면 신청 상태도 바꾼다
+  if (input.leadId) {
+    await updateDB((db) => {
+      const lead = db.leads.find((l) => l.id === input.leadId);
+      if (lead) lead.status = "onboarded";
+    });
+  }
 
   const payerIdx = Math.max(0, input.children.findIndex((c) => c.i === input.payer));
   return { familyId, tokens, payerToken: tokens[payerIdx] };

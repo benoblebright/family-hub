@@ -78,6 +78,41 @@ async function readFirestore(): Promise<DB> {
   return db as unknown as DB;
 }
 
+// 가족 하나에 속한 문서만 읽는다 — 가족방 화면용. 데모 가족이 쌓여도 읽는 양이 늘지 않는다.
+// familyId = "" 이면 아무것도 읽지 않는다 (새 문서만 추가할 때).
+const BY_FAMILY = ["parents", "children", "questions", "reports", "calls", "memories", "stories", "checkins", "events"] as const;
+
+async function readFirestoreFamily(familyId: string): Promise<DB> {
+  const db = normalize({});
+  if (!familyId) return db;
+  const fdb = getFirestore();
+  const sorted = <T>(docs: FirebaseFirestore.QueryDocumentSnapshot[]) =>
+    docs.map((d) => d.data() as Row & { _o?: number }).sort((a, b) => (a._o ?? 0) - (b._o ?? 0)) as unknown as T[];
+  const [fam, ...snaps] = await Promise.all([
+    fdb.collection("families").doc(familyId).get(),
+    ...BY_FAMILY.map((c) => fdb.collection(c).where("familyId", "==", familyId).get()),
+  ]);
+  if (!fam.exists) return db;
+  db.families = [fam.data() as DB["families"][number]];
+  BY_FAMILY.forEach((c, i) => ((db as unknown as Record<string, unknown[]>)[c] = sorted(snaps[i].docs)));
+  // 가족 id가 없는 컬렉션은 질문·사람 id로 찾는다 (in 조건은 30개씩)
+  const inChunks = async (c: "replies" | "checks" | "mailbox", field: string, ids: string[]) => {
+    const out: FirebaseFirestore.QueryDocumentSnapshot[] = [];
+    for (let i = 0; i < ids.length; i += 30) out.push(...(await fdb.collection(c).where(field, "in", ids.slice(i, i + 30)).get()).docs);
+    return sorted(out);
+  };
+  const qids = db.questions.map((q) => q.id), kids = db.children.map((c) => c.id);
+  const [replies, checks, mailbox] = await Promise.all([
+    qids.length ? inChunks("replies", "questionId", qids) : [],
+    kids.length ? inChunks("checks", "childId", kids) : [],
+    kids.length ? inChunks("mailbox", "childId", kids) : [],
+  ]);
+  db.replies = replies as DB["replies"];
+  db.checks = checks as DB["checks"];
+  db.mailbox = mailbox as DB["mailbox"];
+  return db;
+}
+
 // 바뀐 문서만 쓰고, 사라진 문서는 지운다
 async function writeFirestore(before: DB, after: DB) {
   const fdb = getFirestore();
@@ -111,21 +146,21 @@ function stripUndefined<T>(v: T): T {
 }
 
 // ---- 공통 API ----
+// scope: 가족 id를 주면 그 가족 문서만 읽고 쓴다(Firestore). 생략하면 전체 — 운영자 화면용.
+// 파일 저장소(로컬)는 언제나 전체를 다룬다.
 
-export async function readDB(): Promise<DB> {
-  return firestoreEnabled() ? readFirestore() : readFile();
+export async function readDB(scope?: string): Promise<DB> {
+  if (!firestoreEnabled()) return readFile();
+  return scope === undefined ? readFirestore() : readFirestoreFamily(scope);
 }
-
-// 레이아웃(상단 바·탭 배지)처럼 한 요청 안에서 여러 번 읽어도 되는 곳용 — 요청당 1번만 읽는다
-export const readDBCached = cache(readDB);
 
 let queue: Promise<unknown> = Promise.resolve();
 
 // 쓰기는 한 인스턴스 안에서 직렬화한다 (여러 서버 인스턴스 간 동시 쓰기는 MVP 범위 밖)
-export function updateDB<T>(fn: (db: DB) => T | Promise<T>): Promise<T> {
+export function updateDB<T>(fn: (db: DB) => T | Promise<T>, scope?: string): Promise<T> {
   const run = queue.then(async () => {
     if (firestoreEnabled()) {
-      const before = await readFirestore();
+      const before = scope === undefined ? await readFirestore() : await readFirestoreFamily(scope);
       const db = structuredClone(before);
       const result = await fn(db);
       await writeFirestore(before, db);
@@ -178,11 +213,22 @@ export async function loadAudio(name: string): Promise<{ buf: Buffer; type: stri
 }
 
 export async function findChild(token: string, base?: DB) {
-  const db = base ?? (await readDB());
+  let db = base;
+  if (!db) {
+    if (firestoreEnabled()) {
+      const hit = await getFirestore().collection("children").where("token", "==", token).limit(1).get();
+      if (hit.empty) return null;
+      db = await readFirestoreFamily((hit.docs[0].data() as { familyId: string }).familyId);
+    } else db = await readFile();
+  }
   const child = db.children.find((c) => c.token === token);
   if (!child) return null;
-  const family = db.families.find((f) => f.id === child.familyId)!;
+  const family = db.families.find((f) => f.id === child.familyId);
+  if (!family) return null;
   const parent = db.parents.find((p) => p.familyId === family.id)!;
   const siblings = db.children.filter((c) => c.familyId === family.id);
   return { db, child, family, parent, siblings };
 }
+
+// 레이아웃(상단 바·탭 배지)과 페이지가 한 요청에서 같은 가족을 읽을 때 1번만 읽는다
+export const findChildCached = cache((token: string) => findChild(token));

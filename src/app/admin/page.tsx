@@ -19,13 +19,15 @@ export default async function AdminHome() {
   const db = await readDB();
   const hasAI = Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
 
-  const rows = db.families.map((f) => ({
+  // 체험 가족방(평가자·방문자가 만든 데모)은 목록에서 빼고 개수만 보여 준다
+  const demoCount = db.families.filter((f) => f.demo).length;
+  const rows = db.families.filter((f) => !f.demo).map((f) => ({
     f,
     parent: db.parents.find((p) => p.familyId === f.id),
     kpi: familyKpi(db, f.id),
     open: db.questions.filter((q) => q.familyId === f.id && q.status === "open").length,
   }));
-  const paying = db.families.filter((f) => f.status === "active");
+  const paying = db.families.filter((f) => !f.demo && f.status === "active");
   const mrr = paying.reduce((s, f) => s + (PLANS.find((p) => p.id === f.plan)?.price ?? 0), 0);
   const totalSiblingCalls = rows.reduce((s, r) => s + r.kpi.siblingCalls, 0);
   const alerts = rows.filter((r) => r.kpi.missedStreak >= 2 || r.kpi.flags.length > 0);
@@ -41,8 +43,8 @@ export default async function AdminHome() {
 
       <div className="kpis">
         <div className="kpi">
-          <b>{db.families.length}</b>
-          <span>가족 (유료 {paying.length})</span>
+          <b>{rows.length}</b>
+          <span>가족 (유료 {paying.length}) · 체험 가족방 {demoCount}개</span>
         </div>
         <div className="kpi">
           <b>{won(mrr)}</b>

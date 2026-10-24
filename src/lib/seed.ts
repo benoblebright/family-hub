@@ -116,3 +116,30 @@ export function seed(): DB {
     events,
   };
 }
+
+// 체험하기: 데모 가족을 통째로 복제한다 — 모든 id·토큰을 새로 만들고 서로의 참조도 새 id로 바꾼다.
+// 체험자마다 자기 가족방이 생기니 서로의 빨리감기·답장이 섞이지 않는다.
+export function cloneDemo() {
+  const base = seed();
+  const ids = new Map<string, string>();
+  const nid = (old: string) => {
+    if (!ids.has(old)) ids.set(old, crypto.randomUUID().slice(0, 8));
+    return ids.get(old)!;
+  };
+  const refs = ["familyId", "childId", "questionId"] as const;
+  const out = {} as DB;
+  for (const [key, rows] of Object.entries(base) as [keyof DB, { id: string }[]][]) {
+    (out as unknown as Record<string, unknown[]>)[key] = rows.map((row) => {
+      const copy: Record<string, unknown> = { ...row, id: nid(row.id) };
+      for (const r of refs) if (typeof copy[r] === "string") copy[r] = nid(copy[r] as string);
+      return copy;
+    });
+  }
+  const family = out.families[0];
+  family.name = "체험 가족방";
+  family.demo = true;
+  family.createdAt = new Date().toISOString();
+  for (const c of out.children) c.token = crypto.randomUUID().replace(/-/g, "").slice(0, 16);
+  out.leads = [];
+  return { db: out, familyId: family.id, eldest: out.children[0] };
+}

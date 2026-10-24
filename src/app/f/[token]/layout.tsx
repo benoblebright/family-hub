@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { findChild, readDBCached } from "@/lib/db";
+import { findChildCached } from "@/lib/db";
 import { FamilyNav } from "@/components/FamilyNav";
 import { Icon } from "@/components/Icon";
 
 // 가족방 영역: 상단 바(가족방 이름·설정) + 하단 탭(홈·질문·우체통·가족신문·엄마 폰)
 export default async function FamilyLayout({ children, params }: { children: React.ReactNode; params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const found = await findChild(token, await readDBCached());
+  const found = await findChildCached(token);
   if (!found) notFound();
   const { db, child, family } = found;
   const myAnswers = new Set(db.replies.filter((r) => r.childId === child.id).map((r) => r.questionId));

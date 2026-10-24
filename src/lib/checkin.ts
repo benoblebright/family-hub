@@ -145,8 +145,8 @@ export function dueQuestions(db: DB, familyId: string, now: number) {
 }
 
 /** 질문을 마감하고 요약을 만들어 엄마 폰으로 문자 발송 (R3-8) */
-export async function closeQuestionWithSummary(questionId: string) {
-  const db = await readDB();
+export async function closeQuestionWithSummary(questionId: string, familyId?: string) {
+  const db = await readDB(familyId);
   const q = db.questions.find((x) => x.id === questionId);
   if (!q || q.status === "closed") return;
   const family = db.families.find((f) => f.id === q.familyId)!;
@@ -160,14 +160,14 @@ export async function closeQuestionWithSummary(questionId: string) {
     target.status = "closed";
     target.summary = summary;
     pushEvent(fresh, q.familyId, familyNow(family), "sms_out", `[가족방] ${summary.sms}`);
-  });
+  }, q.familyId);
 }
 
 /** 페이지·액션 진입 시 호출: 시간 흐름 처리 + 마감된 질문 요약 */
 // 읽기 1번으로 끝내는 게 기본: 일어날 일이 없으면 쓰지 않는다 (lastTick만 바뀌는 쓰기 생략)
 // tick은 같은 날짜·같은 단계를 두 번 처리하지 않으므로, lastTick을 저장하지 않아도 결과가 같다.
 export async function processFamily(familyId: string, base?: DB): Promise<DB> {
-  let db = base ?? (await readDB());
+  let db = base ?? (await readDB(familyId));
   const f = db.families.find((x) => x.id === familyId);
   if (!f) return db;
   const now = familyNow(f);
@@ -177,11 +177,11 @@ export async function processFamily(familyId: string, base?: DB): Promise<DB> {
   const changed =
     !f.lastTick || // 처음엔 기준 시각을 한 번 저장해야 이후 발송 시각을 셀 수 있다
     draft.events.length !== db.events.length || JSON.stringify(draft.checkins) !== JSON.stringify(db.checkins);
-  if (changed) db = await updateDB((fresh) => (tick(fresh, familyId, now), fresh));
+  if (changed) db = await updateDB((fresh) => (tick(fresh, familyId, now), fresh), familyId);
 
   const due = dueQuestions(db, familyId, now);
-  for (const q of due) await closeQuestionWithSummary(q.id);
-  return due.length ? await readDB() : db;
+  for (const q of due) await closeQuestionWithSummary(q.id, familyId);
+  return due.length ? await readDB(familyId) : db;
 }
 
 /** 엄마 질문 열기 — 가족 시계 기준으로 마감 시각을 잡는다 */
@@ -203,7 +203,7 @@ export async function openMomQuestion(familyId: string, text: string, source: "c
       createdAt: iso(now),
     });
     pushEvent(db, familyId, now, "system", `💌 함께하는 사람들에게 질문을 보냈어요: “${text}” (${hours}시간 뒤 마감)`);
-  });
+  }, familyId);
 }
 
 /** 다음 안부 문자 발송 시각까지 남은 분 */

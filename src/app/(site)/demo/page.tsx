@@ -5,7 +5,7 @@ import { readDB } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 export default async function Demo() {
-  const db = await readDB();
+  const db = await readDB("fam1"); // 고정 데모 가족만 (체험 가족방은 목록에 안 보임)
   return (
     <>
       <div className="hello">

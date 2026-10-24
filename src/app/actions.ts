@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createFamily, parseFamilyForm } from "@/lib/family";
+import { createDemoFamily } from "@/lib/demo";
 import { findChild, newId, saveAudio, updateDB } from "@/lib/db";
 import { josa } from "@/lib/format";
 import { familyNow, processFamily } from "@/lib/checkin";
@@ -37,7 +38,7 @@ export async function submitLead(_: FormState, form: FormData): Promise<FormStat
       status: "new",
       createdAt: new Date().toISOString(),
     });
-  });
+  }, ""); // 새 신청만 추가 — 다른 데이터는 읽지 않는다
   return { ok: true, message: `${name}님, 신청 고마워요. 하루 안에 연락드릴게요.` };
 }
 
@@ -70,7 +71,7 @@ export async function submitReply(_: FormState, form: FormData): Promise<FormSta
       createdAt: new Date().toISOString(),
     });
     return null;
-  });
+  }, found.family.id);
   if (result) return { ok: false, message: result };
 
   // 가족 전원이 답했으면 바로 마감·요약 (R4-3)
@@ -90,7 +91,7 @@ export async function submitCallCheck(_: FormState, form: FormData): Promise<For
 
   await updateDB((db) => {
     db.checks.push({ id: newId(), childId: found.child.id, memo: str(form.get("memo")), createdAt: new Date(familyNow(found.family)).toISOString() });
-  });
+  }, found.family.id);
   revalidatePath(`/f/${token}`);
   const who = josa(found.child.role, "이랑", "랑");
   return { ok: true, message: `기록했어요. 다음 안부콜에서 "${who} 통화하셨다면서요?"로 이어갈게요.` };
@@ -110,7 +111,7 @@ export async function submitMailbox(_: FormState, form: FormData): Promise<FormS
   if (audioFile && !audio && !text) return { ok: false, message: "음성을 저장하지 못했어요. 글로 남겨 주세요." };
   await updateDB((db) => {
     db.mailbox.push({ id: newId(), childId: found.child.id, text, audio, played: false, createdAt: new Date().toISOString() });
-  });
+  }, found.family.id);
   revalidatePath(`/f/${token}`);
   return { ok: true, message: "우체통에 넣었어요. 엄마가 전화하시면 제일 먼저 들려드려요." };
 }
@@ -129,7 +130,7 @@ export async function saveChildSettings(_: FormState, form: FormData): Promise<F
     if (!c) return;
     c.availableHours = hours?.replace(/\s/g, "");
     c.notify = { weekly: form.get("weekly") === "on", questions: form.get("questions") === "on" };
-  });
+  }, found.family.id);
   revalidatePath(`/f/${token}`, "layout");
   return { ok: true, message: "저장했어요." };
 }
@@ -141,4 +142,10 @@ export async function startFamily(_: FormState, form: FormData): Promise<FormSta
   if (input.parentPhone && !/^[0-9-\s]{9,14}$/.test(input.parentPhone)) return { ok: false, message: "부모님 전화번호를 숫자로 적어 주세요." };
   const { payerToken } = await createFamily({ ...input, payer: 0 });
   redirect(`/f/${payerToken}?welcome=1`);
+}
+
+// 체험하기: 체험자마다 새 데모 가족방을 만들어 준다 (링크가 아닌 버튼 — 링크 미리 불러오기로 가족방이 생기지 않게)
+export async function startDemo(form: FormData) {
+  const token = await createDemoFamily();
+  redirect(str(form.get("to")) === "sim" ? `/f/${token}/sim` : `/f/${token}`);
 }

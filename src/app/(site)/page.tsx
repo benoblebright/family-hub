@@ -2,6 +2,7 @@ import { Icon } from "@/components/Icon";
 import Link from "next/link";
 import { PLANS, won } from "@/lib/plans";
 import { LeadForm } from "@/components/LeadForm";
+import { startDemo } from "@/app/actions";
 
 const STEPS = [
   { icon: "call", title: "엄마는 전화만", body: "앱 설치 없이, 2G폰·집전화 그대로. 주 2~3회 AI가 다정하게 안부 전화를 드리고, 한 번 울리고 끊으시면 다시 걸어드려요." },
@@ -12,8 +13,8 @@ const STEPS = [
 // 들어오는 길을 역할별로 나눈다
 const ENTRIES = [
   { href: "/start", icon: "add_home", title: "우리 가족방 만들기", body: "부모님 정보와 함께할 사람을 적으면 1분이면 끝나요" },
-  { href: "/f/minsu-demo", icon: "family_restroom", title: "데모 가족방 둘러보기", body: "큰아들 민수로 들어가 질문·우체통·가족신문을 써 보세요" },
-  { href: "/f/minsu-demo/sim", icon: "smartphone", title: "엄마 폰 체험하기", body: "아침 안부 문자에 답하고, 시간을 빨리 감아 확인콜까지" },
+  { href: "/f/minsu-demo", demo: "home", icon: "family_restroom", title: "데모 가족방 둘러보기", body: "나만의 체험 가족방이 새로 생겨요. 큰아들로 들어가 질문·우체통·가족신문을 써 보세요" },
+  { href: "/f/minsu-demo/sim", demo: "sim", icon: "smartphone", title: "엄마 폰 체험하기", body: "아침 안부 문자에 답하고, 시간을 빨리 감아 확인콜까지 (체험 가족방은 24시간 뒤 사라져요)" },
 ];
 
 const FAQ = [
@@ -41,18 +42,31 @@ export default function Landing() {
 
       <h2 className="section-title">어떻게 시작할까요?</h2>
       <div className="entry-grid">
-        {ENTRIES.map((e) => (
-          <Link key={e.href} href={e.href} className="card link-card entry">
-            <span className="entry-icon">
-              <Icon name={e.icon} />
-            </span>
-            <span className="grow">
-              <b>{e.title}</b>
-              <span className="muted block">{e.body}</span>
-            </span>
-            <Icon name="chevron_right" />
-          </Link>
-        ))}
+        {ENTRIES.map((e) => {
+          const inner = (
+            <>
+              <span className="entry-icon">
+                <Icon name={e.icon} />
+              </span>
+              <span className="grow">
+                <b>{e.title}</b>
+                <span className="muted block">{e.body}</span>
+              </span>
+              <Icon name="chevron_right" />
+            </>
+          );
+          // 데모는 버튼(폼): 누를 때마다 새 체험 가족방을 만든다
+          return e.demo ? (
+            <form key={e.href} action={startDemo}>
+              <input type="hidden" name="to" value={e.demo} />
+              <button className="card link-card entry entry-button">{inner}</button>
+            </form>
+          ) : (
+            <Link key={e.href} href={e.href} className="card link-card entry">
+              {inner}
+            </Link>
+          );
+        })}
       </div>
 
       <section className="card">
