@@ -2,7 +2,7 @@ import { Icon } from "@/components/Icon";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { loadFamilyPage } from "@/lib/family-page";
-import { josa, kstDate, kstLabel, timeAgo, untilDeadline, weekStart } from "@/lib/format";
+import { josa, kstAt, kstDate, kstLabel, timeAgo, untilDeadline, weekStart } from "@/lib/format";
 import { CallCheckForm } from "@/components/Forms";
 import { ResponseCalendar } from "@/components/ResponseCalendar";
 import { InviteCard } from "@/components/InviteCard";
@@ -71,7 +71,7 @@ export default async function FamilyPage({
           <Icon name="wb_sunny" /> 오늘 {parent.name} 안부
           <span className={`tag ${todayCheckin?.answer === 3 || todayCheckin?.callResult === "missed" ? "warn" : todayCheckin?.answer || todayCheckin?.callResult === "answered" ? "ok" : "gray"}`}>
             {!todayCheckin
-              ? `${parent.checkinTime ?? "09:00"} 문자 예정`
+              ? `${kstAt(today, parent.checkinTime ?? "09:00").getTime() > now ? "오늘" : "내일"} ${parent.checkinTime ?? "09:00"} 문자 예정`
               : todayCheckin.answer
                 ? ["", "좋아", "그냥", "별로"][todayCheckin.answer]
                 : todayCheckin.callResult === "answered"
