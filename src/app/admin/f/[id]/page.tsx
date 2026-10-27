@@ -342,7 +342,7 @@ export default async function FamilyAdmin({ params }: { params: Promise<{ id: st
       <section className="card">
         <h2><Icon name="elderly_woman" /> {parent.name} 정보 · 동의</h2>
         <p className="muted">
-          {parent.phone} · {{ "2g": "2G폰", smart: "스마트폰", landline: "집전화" }[parent.phoneType ?? "2g"]}
+          {parent.phone} · {{ "2g": "폴더폰", smart: "스마트폰", landline: "집전화" }[parent.phoneType ?? "smart"]}
           {parent.consent?.at && ` · 동의 기록 ${timeAgo(parent.consent.at)} (${parent.consent.how})`}
         </p>
         <form action={saveConsent} style={{ marginTop: 10 }}>

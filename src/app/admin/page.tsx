@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 const STATUS = { trial: ["무료 체험", ""], active: ["유료", "ok"], paused: ["중지", "gray"] } as const;
 const LEAD = { new: "신규", contacted: "연락함", onboarded: "등록됨", dropped: "보류" } as const;
-const PHONE = { "2g": "2G폰", smart: "스마트폰", landline: "집전화" } as const;
+const PHONE = { "2g": "폴더폰", smart: "스마트폰", landline: "집전화" } as const;
 
 export default async function AdminHome() {
   await requireAdminPage();

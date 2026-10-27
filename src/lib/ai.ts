@@ -67,7 +67,7 @@ export async function classifyQuestion(text: string): Promise<Classified & { by:
 // ---- 답장 취합 요약 ----
 
 export interface Summary {
-  sms: string; // 2G 단문 기준 45자 이내
+  sms: string; // 문자 한 통(단문) 45자 이내
   long: string; // ARS로 읽어드릴 버전
 }
 
@@ -111,7 +111,7 @@ export async function summarizeReplies(
       "1. 답이 없는 사람은 지어내지 말고 '아직 답이 없어요'라고 솔직히 말합니다.\n" +
       "2. '(엄마께 전하지 말 것)' 표시된 메모 내용은 절대 포함하지 않습니다.\n" +
       "3. 날짜가 엇갈리면 엇갈린다고 드러냅니다.\n" +
-      "4. sms는 2G폰 단문 기준 공백 포함 45자 이내, 호칭(큰아들·딸·막내)으로 씁니다.\n" +
+      "4. sms는 문자 한 통(단문)에 들어가게 공백 포함 45자 이내, 호칭(큰아들·딸·막내)으로 씁니다.\n" +
       "5. long은 ARS로 읽어드릴 다정한 존댓말 2~4문장입니다. 음성 답장이 있으면 '목소리도 남겼어요'라고 알려드립니다.",
     `${parentName}의 질문: ${q.text}\n\n답장:\n${lines.join("\n")}`,
     {

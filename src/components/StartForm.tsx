@@ -30,9 +30,9 @@ export function StartForm() {
         <label className="field" htmlFor="st-phone">부모님 전화번호 (체험이면 비워도 돼요)</label>
         <input type="text" id="st-phone" name="parentPhone" inputMode="tel" placeholder="010-" />
         <label className="field" htmlFor="st-type">전화 종류</label>
-        <select id="st-type" name="phoneType" defaultValue="2g">
-          <option value="2g">2G·폴더폰</option>
+        <select id="st-type" name="phoneType" defaultValue="smart">
           <option value="smart">스마트폰</option>
+          <option value="2g">폴더폰</option>
           <option value="landline">집전화</option>
         </select>
       </section>

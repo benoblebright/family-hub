@@ -30,9 +30,9 @@ export function LeadForm() {
         </div>
         <div className="grow">
           <label className="field" htmlFor="lead-parent">부모님 전화</label>
-          <select id="lead-parent" name="parentPhone" defaultValue="2g">
-            <option value="2g">2G·폴더폰</option>
+          <select id="lead-parent" name="parentPhone" defaultValue="smart">
             <option value="smart">스마트폰</option>
+            <option value="2g">폴더폰</option>
             <option value="landline">집전화</option>
           </select>
         </div>

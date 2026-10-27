@@ -33,7 +33,7 @@ export async function submitLead(_: FormState, form: FormData): Promise<FormStat
       phone,
       siblings: Number(form.get("siblings")) || 1,
       plan: plan === "basic" || plan === "premium" ? plan : "standard",
-      parentPhone: parentPhone === "smart" || parentPhone === "landline" ? parentPhone : "2g",
+      parentPhone: parentPhone === "2g" || parentPhone === "landline" ? parentPhone : "smart",
       memo: str(form.get("memo")),
       status: "new",
       createdAt: new Date().toISOString(),

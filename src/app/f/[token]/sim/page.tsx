@@ -34,7 +34,7 @@ export default async function Simulator({ params }: { params: Promise<{ token: s
   return (
     <>
       <div className="hello">
-        <small>{family.name} · 실제 문자 대신 화면으로 재현해요</small>
+        <small>{family.name} · 실제 문자 대신 화면으로 재현해요 · 스마트폰·폴더폰 모두 문자로 똑같이 동작</small>
         <h1><Icon name="smartphone" /> {parent.name} 폰 시뮬레이터</h1>
       </div>
 

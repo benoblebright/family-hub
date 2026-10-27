@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { findChild, updateDB } from "@/lib/db";
 import { familyNow, minutesToNextCheckin, momCall, momSms, openMomQuestion, processFamily, pushEvent, tick } from "@/lib/checkin";
 
-// 엄마 시뮬레이터 — 실제 문자·전화 대신 2G폰 화면에서 같은 흐름을 재현한다
+// 엄마 시뮬레이터 — 실제 문자·전화 대신 휴대폰 화면에서 같은 흐름을 재현한다 (어떤 휴대폰이든 문자로 똑같이 동작)
 
 const str = (v: FormDataEntryValue | null) => (typeof v === "string" ? v.trim() : "");
 

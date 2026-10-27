@@ -9,7 +9,7 @@ export const RULES = {
   resendAfterMin: 120, // 2시간 안에 답이 없으면 재문자
   callAfterMin: 60, // 재문자 후 1시간 안에도 없으면 AI 확인콜
   alertAfterMin: 30, // 확인콜을 30분 안에 안 받으면 가족 알림
-  smsMaxChars: 45, // 2G폰 단문 기준
+  smsMaxChars: 45, // 문자 한 통(단문)에 들어가는 길이 — 어떤 휴대폰에서도 잘리지 않게
 };
 
 const MIN = 60_000;

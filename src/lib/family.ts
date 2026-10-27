@@ -23,7 +23,7 @@ export function parseFamilyForm(form: FormData) {
     familyName: str(form.get("familyName")).slice(0, 30),
     parentName: (str(form.get("parentName")) || "엄마").slice(0, 10),
     parentPhone: str(form.get("parentPhone")),
-    phoneType: (str(form.get("phoneType")) || "2g") as Parent["phoneType"],
+    phoneType: (str(form.get("phoneType")) || "smart") as Parent["phoneType"],
     checkinTime: /^\d{2}:\d{2}$/.test(time) ? time : "09:00",
     callTimes: str(form.get("callTimes")) || undefined,
     notes: str(form.get("notes")) || undefined,
